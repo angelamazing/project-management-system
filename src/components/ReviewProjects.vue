@@ -52,9 +52,9 @@ export default {
   data() {
     return {
       projects: [
-        { id: 1, name: '项目A', type: '施工', status: '待审核', description: '这是项目A的描述' },
-        { id: 2, name: '项目B', type: '设计', status: '待审核', description: '这是项目B的描述' },
-        { id: 3, name: '项目C', type: '测绘', status: '待审核', description: '这是项目C的描述' },
+        { id: 1, name: '项目A', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目A的描述' },
+        { id: 2, name: '项目B', type: '地质勘察钻探类', status: '待审核', description: '这是项目B的描述' },
+        { id: 3, name: '项目C', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目C的描述' },
         // 更多模拟项目数据...
       ],
       detailDialogVisible: false,

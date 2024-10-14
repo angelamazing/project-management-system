@@ -295,24 +295,25 @@ const openCreateDialog = () => {
 const openEditDialog = (project) => {
   resetForm();
   currentAction.value = 'edit';
-  projectForm.value = cloneDeep(project); // 深拷贝整个项目数据
-  projectForm.value.construction = cloneDeep(project.construction); // 深拷贝施工工艺部分
+  projectForm.value = cloneDeep(project); 
   showDialog.value = true;
 };
-
+  
 const updateConstructionData = (newData) => {
-  projectForm.value.construction = { ...newData }; // 接收并更新施工工艺数据
+  projectForm.value.construction = cloneDeep(newData); // 接收并更新施工工艺数据
 };
 
 const handleSave = () => {
-  console.log('保存的项目数据:', projectForm.value); // 调试输出
+  console.log('保存的项目数据:', projectForm.value);
+  const projectToSave = cloneDeep(projectForm.value); // Create a deep copy of the entire project data
+
   if (currentAction.value === 'create') {
     const newProjectId = unsubmittedProjects.value.length + 1;
-    unsubmittedProjects.value.push({ ...projectForm.value, id: newProjectId });
+    unsubmittedProjects.value.push({ ...projectToSave, id: newProjectId });
   } else if (currentAction.value === 'edit') {
-    const index = unsubmittedProjects.value.findIndex((p) => p.id === projectForm.value.id);
+    const index = unsubmittedProjects.value.findIndex((p) => p.id === projectToSave.id);
     if (index !== -1) {
-      unsubmittedProjects.value.splice(index, 1, cloneDeep(projectForm.value)); // 深拷贝确保数据独立
+      unsubmittedProjects.value.splice(index, 1, projectToSave);
     }
   }
   showDialog.value = false;
@@ -354,7 +355,7 @@ const resetForm = () => {
     repair_scale: '',
     drill_machine_count: '',
     field_investigator_count: '',
-    construction: cloneDeep({}), // 确保施工工艺初始值
+    construction: {}, // 确保施工工艺初始值
   };
 };
 
