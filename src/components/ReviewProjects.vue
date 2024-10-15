@@ -1,31 +1,32 @@
 <!--
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-10-05 12:09:05
+ * @LastEditors: Jerry Han angelamazing@163.com
+ * @LastEditTime: 2024-10-15 15:16:14
  * @FilePath: \project-management-system\src\components\ReviewProjects.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE%E8%AE%BE%E8%AE%BE
 -->
 <template>
   <div class="review-projects">
-    <el-card>
-      <h2>待审核项目列表</h2>
-      <el-table :data="projects" style="width: 100%">
-        <el-table-column prop="name" label="项目名称"></el-table-column>
-        <el-table-column prop="type" label="项目类型"></el-table-column>
-        <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column label="操作">
-          <template v-slot="scope">
-            <el-button type="primary" size="mini" @click="reviewProject(scope.row, '通过')">通过</el-button>
-            <el-button type="danger" size="mini" @click="reviewProject(scope.row, '拒绝')">拒绝</el-button>
-            <el-button size="mini" @click="viewDetails(scope.row)">查看详情</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+    <el-table :data="projects" style="width: 100%">
+      <el-table-column prop="name" label="项目名称"></el-table-column>
+      <el-table-column prop="type" label="项目类型"></el-table-column>
+      <el-table-column prop="status" label="状态"></el-table-column>
+      <el-table-column label="操作">
+        <template #default="scope">
+          <el-button type="primary" size="mini" @click="reviewProject(scope.row, '通过')">通过</el-button>
+          <el-button type="danger" size="mini" @click="reviewProject(scope.row, '拒绝')">拒绝</el-button>
+          <el-button size="mini" @click="viewDetails(scope.row)">查看详情</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    <el-dialog v-model:visible="detailDialogVisible" title="项目详情">
-      <el-form label-position="left" label-width="120px">
+    <el-dialog
+      v-model="detailDialogVisible"
+      title="项目详情"
+      :close-on-click-modal="false"
+    >
+      <el-form label-width="120px">
         <el-form-item label="项目名称">
           <el-input v-model="currentProject.name" disabled></el-input>
         </el-form-item>
@@ -39,9 +40,6 @@
           <el-input type="textarea" v-model="currentProject.description" disabled></el-input>
         </el-form-item>
       </el-form>
-      <template v-slot:footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
-      </template>
     </el-dialog>
   </div>
 </template>
@@ -86,6 +84,7 @@ export default {
       });
     },
     viewDetails(project) {
+      console.log('viewDetails called', project); // 添加这行来调试
       this.currentProject = { ...project };
       this.detailDialogVisible = true;
     }

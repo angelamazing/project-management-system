@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form-item label="施工工艺">
+    <el-form-item label="施工工艺" required>
       <el-radio-group v-model="localForm.constructionType" @change="handleConstructionTypeChange">
         <el-radio label="地灾治理和矿山生态修复类">地灾治理和矿山生态修复类</el-radio>
         <el-radio label="钻探类">钻探类</el-radio>

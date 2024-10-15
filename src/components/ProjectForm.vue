@@ -10,7 +10,7 @@
         <el-table-column label="操作">
           <template #default="{ row }">
             <el-button @click="openEditDialog(row)" type="primary" size="small">查看详情</el-button>
-            <el-button @click="deleteProject(row)" type="danger" size="small" style="margin-left: 10px;">删除</el-button>
+            <el-button @click="confirmDelete(row)" type="danger" size="small" style="margin-left: 10px;">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -71,7 +71,7 @@
         </el-form-item>
 
         <!-- 场地内部环境 -->
-        <el-form-item label="场地内部环境">
+        <el-form-item label="场地内部环境" required>
           <el-checkbox-group v-model="projectForm.internal_conditions">
             <el-checkbox
               v-for="condition in internalConditions"
@@ -85,6 +85,7 @@
         <construction-techniques 
           :initialData="projectForm.construction" 
           @updateData="updateConstructionData" 
+          
         />
 
         <!-- 团队管理信息 -->
@@ -176,6 +177,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { ElMessageBox, ElMessage } from 'element-plus';
 import cloneDeep from 'lodash/cloneDeep';
 import ConstructionTechniques from './Form/ConstructionTechniques.vue'; // 子组件
 // 引入 lodash 的 cloneDeep
@@ -328,6 +330,31 @@ const handleSubmit = () => {
   }
   showDialog.value = false;
   resetForm();
+};
+
+const confirmDelete = (project) => {
+  ElMessageBox.confirm(
+    `确定要删除项目 "${project.project_name}" 吗？`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      deleteProject(project);
+      ElMessage({
+        type: 'success',
+        message: '删除成功',
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '已取消删除',
+      });
+    });
 };
 
 const deleteProject = (project) => {
