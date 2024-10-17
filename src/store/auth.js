@@ -62,6 +62,7 @@ export default createStore({
     }
   },
   getters: {
+    username: state => state.user.username,
     isAuthenticated: state => !!state.user,
     userRole: state => state.user ? state.user.role : null, // 确保从 user 中获取角色
     userPermissions: state => state.user ? state.user.permissions : [], // 确保从 user 中获取权限
