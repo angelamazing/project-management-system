@@ -40,7 +40,6 @@
           </el-select>
         </el-form-item>
 
-        <!-- 动态表单项 -->
         <el-form-item v-if="isRepairProject" label="治理项目规模" required>
           <el-select v-model="projectForm.repair_scale" placeholder="请选择治理项目规模">
             <el-option v-for="(scale, index) in repairScales" :key="index" :label="scale.label" :value="scale.value"></el-option>
@@ -95,7 +94,6 @@
         <construction-techniques 
           :initialData="projectForm.construction" 
           @updateData="updateConstructionData" 
-          
         />
 
         <!-- 团队管理信息 -->
@@ -189,9 +187,7 @@
 import { ref, computed } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import cloneDeep from 'lodash/cloneDeep';
-import ConstructionTechniques from './Form/ConstructionTechniques.vue'; // 子组件
-// 引入 lodash 的 cloneDeep
-
+import ConstructionTechniques from './Form/ConstructionTechniques.vue';
 
 const showDialog = ref(false);
 const unsubmittedProjects = ref([
@@ -217,10 +213,6 @@ const projectForm = ref({
 });
 
 const currentAction = ref('');
-
-const isRepairProject = computed(() => projectForm.value.project_type === '地灾治理和矿山生态修复类');
-const isDrillingProject = computed(() => projectForm.value.project_type === '地质勘查钻探类');
-const isSurveyProject = computed(() => projectForm.value.project_type === '地质调查、测量测绘类');
 
 const projectTypes = ['地灾治理和矿山生态修复类', '地质勘查钻探类', '地质调查、测量测绘类'];
 const repairScales = [
@@ -298,6 +290,10 @@ const subcontractEducationLevels = [
   { label: '全部为初中以上 (0 分)', value: '0' },
 ];
 
+const isRepairProject = computed(() => projectForm.value.project_type === projectTypes[0]);
+const isDrillingProject = computed(() => projectForm.value.project_type === projectTypes[1]);
+const isSurveyProject = computed(() => projectForm.value.project_type === projectTypes[2]);
+
 const openCreateDialog = () => {
   resetForm();
   currentAction.value = 'create';
@@ -307,41 +303,46 @@ const openCreateDialog = () => {
 const openEditDialog = (project) => {
   resetForm();
   currentAction.value = 'edit';
-  projectForm.value = cloneDeep(project); 
+  projectForm.value = cloneDeep(project);
   showDialog.value = true;
 };
-  
+
 const updateConstructionData = (newData) => {
-  projectForm.value.construction = cloneDeep(newData); // 接收并更新施工工艺数据
+  projectForm.value.construction = cloneDeep(newData);
 };
 
 const handleSave = () => {
-  console.log('保存的项目数据:', projectForm.value);
-  const projectToSave = cloneDeep(projectForm.value); // Create a deep copy of the entire project data
+  const projectToSave = cloneDeep(projectForm.value);
 
-  if (currentAction.value === 'create') {
-    const newProjectId = unsubmittedProjects.value.length + 1;
-    unsubmittedProjects.value.push({ ...projectToSave, id: newProjectId });
-  } else if (currentAction.value === 'edit') {
-    const index = unsubmittedProjects.value.findIndex((p) => p.id === projectToSave.id);
-    if (index !== -1) {
-      unsubmittedProjects.value.splice(index, 1, projectToSave);
+  try {
+    if (currentAction.value === 'create') {
+      const newProjectId = (unsubmittedProjects.value.length + 1);
+      unsubmittedProjects.value.push({ ...projectToSave, id: newProjectId });
+    } else if (currentAction.value === 'edit') {
+      const index = unsubmittedProjects.value.findIndex((p) => p.id === projectToSave.id);
+      if (index !== -1) {
+        unsubmittedProjects.value.splice(index, 1, projectToSave);
+      } else {
+        throw new Error("项目未找到");
+      }
     }
+    showDialog.value = false;
+    resetForm();
+  } catch (error) {
+    ElMessage.error(`保存项目错误: ${error.message}`);
   }
-  showDialog.value = false;
-  resetForm();
 };
 
 const handleSubmit = () => {
   if (isProjectComplete()) {
     const index = unsubmittedProjects.value.findIndex((p) => p.project_name === projectForm.value.project_name);
     if (index !== -1) {
-      unsubmittedProjects.value.splice(index, 1); // 从未提交列表中移除项目
-      projectForm.value.status = '提交审核'; // 更新项目状态
+      unsubmittedProjects.value.splice(index, 1);
+      projectForm.value.status = '提交审核';
+      showDialog.value = false;
+      resetForm();
+      ElMessage.success('项目已成功提交审核');
     }
-    showDialog.value = false;
-    resetForm();
-    ElMessage.success('项目已成功提交审核');
   } else {
     ElMessage.warning('请填写所有必填信息后再提交审核');
   }
@@ -363,15 +364,11 @@ const isProjectComplete = () => {
     'end_date'
   ];
 
-  // 检查基本字段
   const basicFieldsComplete = requiredFields.every(field => {
-    if (Array.isArray(projectForm.value[field])) {
-      return projectForm.value[field].length > 0;
-    }
-    return projectForm.value[field] !== '' && projectForm.value[field] !== null;
+    const value = projectForm.value[field];
+    return Array.isArray(value) ? value.length > 0 : value !== '' && value !== null;
   });
 
-  // 检查特定项目类型的字段
   let specificFieldComplete = true;
   if (isRepairProject.value) {
     specificFieldComplete = projectForm.value.repair_scale !== '';
@@ -381,15 +378,10 @@ const isProjectComplete = () => {
     specificFieldComplete = projectForm.value.field_investigator_count !== '';
   }
 
-  // 检查施工工艺数据
   const constructionComplete = Object.keys(projectForm.value.construction).length > 0;
 
-  // 检查周边环境
-  if (projectForm.value.surrounding_risks === 'custom' && !projectForm.value.custom_surrounding_risks) {
-    return false;
-  }
-
-  return basicFieldsComplete && specificFieldComplete && constructionComplete;
+  return basicFieldsComplete && specificFieldComplete && constructionComplete &&
+    !(projectForm.value.surrounding_risks === 'custom' && !projectForm.value.custom_surrounding_risks);
 };
 
 const confirmDelete = (project) => {
@@ -404,16 +396,10 @@ const confirmDelete = (project) => {
   )
     .then(() => {
       deleteProject(project);
-      ElMessage({
-        type: 'success',
-        message: '删除成功',
-      });
+      ElMessage.success('删除成功');
     })
     .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '已取消删除',
-      });
+      ElMessage.info('已取消删除');
     });
 };
 
@@ -421,6 +407,8 @@ const deleteProject = (project) => {
   const index = unsubmittedProjects.value.findIndex((p) => p.project_name === project.project_name);
   if (index !== -1) {
     unsubmittedProjects.value.splice(index, 1);
+  } else {
+    ElMessage.error("项目未找到，无法删除");
   }
 };
 
@@ -439,17 +427,18 @@ const resetForm = () => {
     start_date: '',
     end_date: '',
     status: '未提交',
+    construction: {},
+    custom_surrounding_risks: '',
     repair_scale: '',
     drill_machine_count: '',
     field_investigator_count: '',
-    construction: {}, // 确保施工工艺初始值
-    custom_surrounding_risks: '',
   };
 };
 
 const onProjectTypeChange = () => {
   // 根据项目类型变化逻辑
 };
+
 </script>
 
 <style scoped>

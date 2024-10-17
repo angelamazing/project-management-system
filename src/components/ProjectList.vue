@@ -35,26 +35,10 @@
       @sort-change="handleSortChange"
       highlight-current-row
     >
-      <el-table-column
-        prop="name"
-        label="项目名称"
-        sortable
-      ></el-table-column>
-      <el-table-column
-        prop="type"
-        label="项目类型"
-        sortable
-      ></el-table-column>
-      <el-table-column
-        prop="status"
-        label="状态"
-        sortable
-      ></el-table-column>
-      <el-table-column
-        prop="completion"
-        label="完成状态"
-        sortable
-      ></el-table-column>
+      <el-table-column prop="name" label="项目名称" sortable />
+      <el-table-column prop="type" label="项目类型" sortable />
+      <el-table-column prop="status" label="状态" sortable />
+      <el-table-column prop="completion" label="完成状态" sortable />
       <el-table-column label="操作">
         <template #default="{ row }">
           <el-button
@@ -70,7 +54,6 @@
     <!-- 项目详情对话框 -->
     <ProjectDetailsTemplate v-if="isDialogVisible" :project="projectDetails" v-model="isDialogVisible" />
 
-
     <!-- 分页器 -->
     <el-pagination
       class="custom-pagination"
@@ -85,8 +68,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { ElTable, ElTableColumn, ElButton, ElPagination, ElInput, ElSelect, ElOption } from 'element-plus';
-import 'element-plus/dist/index.css';
 import ProjectDetailsTemplate from './Form/ProjectDetailsTemplate.vue';
 import { nextTick } from 'vue';
 
@@ -113,30 +94,30 @@ const isDialogVisible = ref(false);
 
 // 计算分页数据
 const updatePaginatedProjects = () => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = currentPage.value * pageSize.value;
+  try {
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = currentPage.value * pageSize.value;
 
-  // 根据搜索条件过滤项目
-  let filteredProjects = allProjects.filter(project => {
-    return (
-      (!searchQuery.value.name || project.name.includes(searchQuery.value.name)) &&
-      (!searchQuery.value.type || project.type === searchQuery.value.type) &&
-      (!searchQuery.value.status || project.status === searchQuery.value.status) &&
-      (!searchQuery.value.completion || project.completion === searchQuery.value.completion)
-    );
-  });
-
-  // 排序
-  if (sortProp.value) {
-    filteredProjects.sort((a, b) => {
-      if (a[sortProp.value] < b[sortProp.value]) return sortOrder.value === 'ascending' ? -1 : 1;
-      if (a[sortProp.value] > b[sortProp.value]) return sortOrder.value === 'ascending' ? 1 : -1;
-      return 0;
+    // 根据搜索条件过滤项目
+    const filteredProjects = allProjects.filter(project => {
+      return (
+        (!searchQuery.value.name || project.name.includes(searchQuery.value.name)) &&
+        (!searchQuery.value.type || project.type === searchQuery.value.type) &&
+        (!searchQuery.value.status || project.status === searchQuery.value.status) &&
+        (!searchQuery.value.completion || project.completion === searchQuery.value.completion)
+      );
     });
-  }
 
-  paginatedProjects.value = filteredProjects.slice(start, end);
-  total.value = filteredProjects.length;
+    // 排序
+    filteredProjects.sort((a, b) => {
+      return (a[sortProp.value] < b[sortProp.value] ? -1 : 1) * (sortOrder.value === 'ascending' ? 1 : -1);
+    });
+
+    paginatedProjects.value = filteredProjects.slice(start, end);
+    total.value = filteredProjects.length;
+  } catch (error) {
+    console.error("更新分页项目时出错:", error);
+  }
 };
 
 // 处理页码变更
@@ -148,7 +129,7 @@ const handlePageChange = (page) => {
 // 处理排序变更
 const handleSortChange = ({ prop, order }) => {
   sortProp.value = prop;
-  sortOrder.value = order === 'ascending' ? 'ascending' : 'descending';
+  sortOrder.value = (order === 'ascending') ? 'ascending' : 'descending';
   updatePaginatedProjects();
 };
 
@@ -158,7 +139,6 @@ const viewProjectDetails = (project) => {
   nextTick(() => {
     isDialogVisible.value = true;
   });
-  console.log('查看详情:', projectDetails.value, isDialogVisible.value);
 };
 
 // 初始化
@@ -198,21 +178,6 @@ onMounted(() => {
   background-color: #66b1ff;
 }
 
-.el-dialog {
-  border-radius: 8px;
-}
-
-.close-button {
-  background-color: #f56c6c;
-  color: white;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.close-button:hover {
-  background-color: #ff8a8a;
-}
-
 .custom-pagination {
   display: flex;
   justify-content: center;
@@ -227,13 +192,5 @@ onMounted(() => {
 
 .el-table-column--sortable .caret-wrapper {
   color: #409eff;
-}
-
-.el-table__header-wrapper {
-  border-bottom: 2px solid #ebeef5;
-}
-
-.el-pagination__total {
-  color: #666;
 }
 </style>

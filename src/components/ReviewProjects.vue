@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-10-15 15:16:14
+ * @LastEditTime: 2024-10-17 11:07:08
  * @FilePath: \project-management-system\src\components\ReviewProjects.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE%E8%AE%BE%E8%AE%BE
 -->
@@ -60,31 +60,50 @@ export default {
     };
   },
   methods: {
-    reviewProject(project, decision) {
-      this.$confirm(`你确定要${decision}这个项目吗?`, '确认', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
+    async reviewProject(project, decision) {
+      try {
+        await this.$confirm(`你确定要${decision}这个项目吗?`, '确认', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        });
+
         // 更新项目状态
-        project.status = decision === '通过' ? '审核通过' : '审核未通过';
-        
-        // 从项目列表中删除审核的项目
-        this.projects = this.projects.filter(p => p.id !== project.id);
-        
+        const newStatus = decision === '通过' ? '审核通过' : '审核未通过';
+        this.updateProjectStatus(project, newStatus);
+      } catch (error) {
+        if (error !== 'cancel') {
+          this.$message({
+            type: 'error',
+            message: '操作出现错误，请重试'
+          });
+        } else {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });
+        }
+      }
+    },
+    updateProjectStatus(project, status) {
+      project.status = status;
+      
+      // 从项目列表中删除审核的项目
+      const index = this.projects.findIndex(p => p.id === project.id);
+      if (index !== -1) {
+        this.projects.splice(index, 1);
         this.$message({
           type: 'success',
-          message: `项目已${decision}`
+          message: `项目已${status === '审核通过' ? '通过' : '拒绝'}`
         });
-      }).catch(() => {
+      } else {
         this.$message({
-          type: 'info',
-          message: '操作已取消'
+          type: 'error',
+          message: '项目未找到，无法更新状态'
         });
-      });
+      }
     },
     viewDetails(project) {
-      console.log('viewDetails called', project); // 添加这行来调试
       this.currentProject = { ...project };
       this.detailDialogVisible = true;
     }

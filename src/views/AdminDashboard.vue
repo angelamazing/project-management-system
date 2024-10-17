@@ -88,7 +88,7 @@ export default {
   margin-bottom: 20px;
   text-align: right;
   top: 10px; /* 添加这行 */
-  right: -1350px; /* 添加这行 */
+  right: 10px; /* 添加这行 */
 }
 
 .login-management-button {
