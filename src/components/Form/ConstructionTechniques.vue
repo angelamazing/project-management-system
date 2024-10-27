@@ -145,8 +145,8 @@ export default {
         model: '0',
         options: [
           { label: '0m³ (0分)', value: '0' },
-          { label: '0m³<＜50m³ (4分)', value: '4' },
-          { label: '50m³<＜100m³ (8分)', value: '8' },
+          { label: '0m³＜＜50m³ (4分)', value: '4' },
+          { label: '50m³≤＜100m³ (8分)', value: '8' },
           { label: '≥100m³ (15分)', value: '15' },
         ],
       },
@@ -155,7 +155,7 @@ export default {
         model: '0',
         options: [
           { label: '0m (0分)', value: '0' },
-          { label: '0m<＜5m (4分)', value: '4' },
+          { label: '0m＜＜5m (4分)', value: '4' },
           { label: '5m≤＜10m (8分)', value: '8' },
           { label: '≥10m (15分)', value: '15' },
         ],
@@ -165,7 +165,7 @@ export default {
         model: '0',
         options: [
           { label: '0m³ (0分)', value: '0' },
-          { label: '0m³<＜1000m³ (2分)', value: '2' },
+          { label: '0m³＜＜1000m³ (2分)', value: '2' },
           { label: '1000m³≤＜3000m³ (3分)', value: '3' },
           { label: '≥3000m³ (5分)', value: '5' },
         ],
@@ -175,7 +175,7 @@ export default {
         model: '0',
         options: [
           { label: '0m (0分)', value: '0' },
-          { label: '0m<＜15m (4分)', value: '4' },
+          { label: '0m＜＜15m (4分)', value: '4' },
           { label: '15m≤＜24m (8分)', value: '8' },
           { label: '≥24m (15分)', value: '15' },
         ],
@@ -185,7 +185,7 @@ export default {
         model: '0',
         options: [
           { label: '0° (0分)', value: '0' },
-          { label: '0°<＜30° (2分)', value: '2' },
+          { label: '0°＜＜30° (2分)', value: '2' },
           { label: '30°≤＜45° (4分)', value: '4' },
           { label: '≥45° (10分)', value: '10' },
         ],
@@ -195,7 +195,7 @@ export default {
         model: '0',
         options: [
           { label: '0m (0分)', value: '0' },
-          { label: '0m<＜10m (2分)', value: '2' },
+          { label: '0m＜＜10m (2分)', value: '2' },
           { label: '10m≤＜15m (4分)', value: '4' },
           { label: '≥15m (10分)', value: '10' },
         ],
@@ -205,7 +205,7 @@ export default {
         model: '0',
         options: [
           { label: '0m (0分)', value: '0' },
-          { label: '0m<＜3m (1分)', value: '1' },
+          { label: '0m＜＜3m (1分)', value: '1' },
           { label: '≥3m (5分)', value: '5' },
         ],
       },
@@ -214,7 +214,7 @@ export default {
         model: '0',
         options: [
           { label: '0m (0分)', value: '0' },
-          { label: '0m<＜30m (1分)', value: '1' },
+          { label: '0m＜＜30m (1分)', value: '1' },
           { label: '≥30m (5分)', value: '5' },
         ],
       },

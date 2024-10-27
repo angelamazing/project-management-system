@@ -2,18 +2,20 @@
   <div class="dashboard">
     <AppSidebar />
     <div class="dashboard-content">
-      <!-- 修改下拉菜单的实现 -->
-      <el-dropdown class="dropdown-button">
-        <el-button class="login-management-button">
-          登录管理 <i class="el-icon-arrow-down el-icon--right"></i>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="viewProfile">登录信息</el-dropdown-item>
-            <el-dropdown-item divided @click="logout">注销登录</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      <div class="header">
+        <!-- 修改下拉菜单的实现 -->
+        <el-dropdown class="dropdown-button">
+          <el-button class="login-management-button">
+            登录管理 <i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="viewProfile">登录信息</el-dropdown-item>
+              <el-dropdown-item divided @click="logout">注销登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
       
       <el-card v-if="isDashboardRoot" class="welcome-card">
         <h2>欢迎回来, 朋友{{ username }}!</h2>
@@ -31,6 +33,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import { mapGetters } from 'vuex';
@@ -70,25 +73,30 @@ export default {
   }
 }
 </script>
-
 <style>
 .dashboard {
   display: flex;
   position: relative;
   min-height: 100vh; /* 确保整个页面占满视口高度 */
+  background-color: #f0f0f0; /* 背景设为浅灰色 */
 }
 
 .dashboard-content {
   flex-grow: 1;
   padding: 20px; /* 调整整体填充 */
-  
+  background-color: #ffffff; /* 内容区设为白色以与背景形成对比 */
+  border-radius: 8px; /* 添加圆角 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end; /* 将元素推到右侧 */
+  margin-bottom: 20px; /* 下方留一些空间 */
 }
 
 .dropdown-button {
-  margin-bottom: 20px;
-  text-align: right;
-  top: 10px; /* 添加这行 */
-  right: 10px; /* 添加这行 */
+  text-align: right; /* 右对齐 */
 }
 
 .login-management-button {
@@ -100,27 +108,12 @@ export default {
 
 .welcome-card {
   margin-bottom: 20px;
-  background-color: #f9fafc;
-  border-left: 5px solid #409EFF;
+  background-color: #e0e0e0; /* 卡片背景设为灰色 */
+  border-left: 5px solid #409EFF; /* 左边框设为深灰色 */
   padding: 20px;
+  color: #333; /* 文字颜色设为深色以便可读 */
 }
 
-.dashboard-content > .el-card {
-  margin-top: 20px; /* 保持卡片顶部的间距 */
-  
-}
 
-.dashboard-content,
-.AppSidebar {
-  align-items: flex-start; /* 将内容区域置顶 */
-}
-
-/* 添加以下样式以确保下拉菜单正确显示 */
-.el-dropdown-menu {
-  margin-top: 5px;
-}
-
-.el-dropdown-menu__item {
-  padding: 10px 20px;
-}
 </style>
+

@@ -79,6 +79,7 @@
           </div>
         </el-form-item>
 
+
         <!-- 场地内部环境 -->
         <el-form-item label="场地内部环境" required>
           <el-checkbox-group v-model="projectForm.internal_conditions">
@@ -216,32 +217,32 @@ const currentAction = ref('');
 
 const projectTypes = ['地灾治理和矿山生态修复类', '地质勘查钻探类', '地质调查、测量测绘类'];
 const repairScales = [
-  { label: '治理项目规模 300 万以上 (8分)', value: '8' },
-  { label: '治理项目规模 100~300 万 (7分)', value: '7' },
-  { label: '治理项目规模 100 万以下 (6分)', value: '6' },
+  { label: '治理项目规模 300 万以上 (8分)', value: '治理项目规模 300 万以上 (8分)' },
+  { label: '治理项目规模 100~300 万 (7分)', value: '治理项目规模 100~300 万 (7分)' },
+  { label: '治理项目规模 100 万以下 (6分)', value: '治理项目规模 100 万以下 (6分)' },
 ];
 const drillCounts = [
-  { label: '钻机数量 10 台及以上 (8分)', value: '8' },
-  { label: '钻机数量 6~9 台 (7分)', value: '7' },
-  { label: '钻机数量 5 台 (6分)', value: '6' },
-  { label: '钻机数量 3~4 台 (5分)', value: '5' },
-  { label: '钻机数量 1~2 台 (4分)', value: '4' },
+  { label: '钻机数量 10 台及以上 (8分)', value: '钻机数量 10 台及以上 (8分)' },
+  { label: '钻机数量 6~9 台 (7分)', value: '钻机数量 6~9 台 (7分)' },
+  { label: '钻机数量 5 台 (6分)', value: '钻机数量 5 台 (6分)' },
+  { label: '钻机数量 3~4 台 (5分)', value: '钻机数量 3~4 台 (5分)' },
+  { label: '钻机数量 1~2 台 (4分)', value: '钻机数量 1~2 台 (4分)' },
 ];
 const investigatorCounts = [
-  { label: '同时野外调查人员 8 人及以上 (8分)', value: '8' },
-  { label: '同时野外调查人员 7 人 (7分)', value: '7' },
-  { label: '同时野外调查人员 6 人 (6分)', value: '6' },
-  { label: '同时野外调查人员 5 人 (5分)', value: '5' },
-  { label: '同时野外调查人员 4 人 (4分)', value: '4' },
-  { label: '同时野外调查人员 3 人 (3分)', value: '3' },
-  { label: '同时野外调查人员 2 人 (2分)', value: '2' },
+  { label: '同时野外调查人员 8 人及以上 (8分)', value: '同时野外调查人员 8 人及以上 (8分)' },
+  { label: '同时野外调查人员 7 人 (7分)', value: '同时野外调查人员 7 人 (7分)' },
+  { label: '同时野外调查人员 6 人 (6分)', value: '同时野外调查人员 6 人 (6分)' },
+  { label: '同时野外调查人员 5 人 (5分)', value: '同时野外调查人员 5 人 (5分)' },
+  { label: '同时野外调查人员 4 人 (4分)', value: '同时野外调查人员 4 人 (4分)' },
+  { label: '同时野外调查人员 3 人 (3分)', value: '同时野外调查人员 3 人 (3分)' },
+  { label: '同时野外调查人员 2 人 (2分)', value: '同时野外调查人员 2 人 (2分)' },
 ];
 const surroundingRisks = [
-  { label: '存在一项风险 (6分)', value: '6' },
-  { label: '存在两项风险 (7分)', value: '7' },
-  { label: '存在三项风险 (8分)', value: '8' },
-  { label: '存在四项风险 (9分)', value: '9' },
-  { label: '存在五项风险 (10分)', value: '10' },
+  { label: '存在一项风险 (6分)', value: '存在一项风险 (6分)' },
+  { label: '存在两项风险 (7分)', value: '存在两项风险 (7分)' },
+  { label: '存在三项风险 (8分)', value: '存在三项风险 (8分)' },
+  { label: '存在四项风险 (9分)', value: '存在四项风险 (9分)' },
+  { label: '存在五项风险 (10分)', value: '存在五项风险 (10分)' },
   { label: '其他（自定义）', value: 'custom' },
 ];
 const internalConditions = [
@@ -256,39 +257,46 @@ const internalConditions = [
   '生活环境安全良好',
   '材料堆放区规划合理',
 ];
+
 const managementExperiences = [
-  { label: '未从事过类似项目管理 (8分)', value: '8' },
-  { label: '从事过类似项目管理 1 个 (5分)', value: '5' },
-  { label: '从事过类似项目管理 2 个 (3分)', value: '3' },
-  { label: '从事过类似项目管理超过 2 个 (0分)', value: '0' },
+  { label: '未从事过类似项目管理 (8分)', value: '未从事过类似项目管理 (8分)' },
+  { label: '从事过类似项目管理 1 个 (5分)', value: '从事过类似项目管理 1 个 (5分)' },
+  { label: '从事过类似项目管理 2 个 (3分)', value: '从事过类似项目管理 2 个 (3分)' },
+  { label: '从事过类似项目管理超过 2 个 (0分)', value: '从事过类似项目管理超过 2 个 (0分)' },
 ];
+
 const professionalStructures = [
-  { label: '非工程类专业 (2分)', value: '2' },
-  { label: '工程类非对口专业 (1分)', value: '1' },
-  { label: '工程类对口专业 (0分)', value: '0' },
+  { label: '非工程类专业 (2分)', value: '非工程类专业 (2分)' },
+  { label: '工程类非对口专业 (1分)', value: '工程类非对口专业 (1分)' },
+  { label: '工程类对口专业 (0分)', value: '工程类对口专业 (0分)' },
 ];
+
 const educationLevels = [
-  { label: '本科以下学历 (2分)', value: '2' },
-  { label: '本科及以上学历 (非地质院校) (1分)', value: '1' },
-  { label: '本科及以上学历 (地质院校) (0分)', value: '0' },
+  { label: '本科以下学历 (2分)', value: '本科以下学历 (2分)' },
+  { label: '本科及以上学历 (非地质院校) (1分)', value: '本科及以上学历 (非地质院校) (1分)' },
+  { label: '本科及以上学历 (地质院校) (0分)', value: '本科及以上学历 (地质院校) (0分)' },
 ];
+
 const subcontractAges = [
-  { label: '超过 50 岁 (10分)', value: '10' },
-  { label: '40 岁~50 岁 (8分)', value: '8' },
-  { label: '30 岁~40 岁 (6分)', value: '6' },
-  { label: '小于 30 岁 (0分)', value: '0' },
+  { label: '超过 50 岁 (10分)', value: '超过 50 岁 (10分)' },
+  { label: '40 岁~50 岁 (8分)', value: '40 岁~50 岁 (8分)' },
+  { label: '30 岁~40 岁 (6分)', value: '30 岁~40 岁 (6分)' },
+  { label: '小于 30 岁 (0分)', value: '小于 30 岁 (0分)' },
 ];
+
 const subcontractExperiences = [
-  { label: '未从事过类似项目 (10分)', value: '10' },
-  { label: '从事过类似业绩 1 个 (8分)', value: '8' },
-  { label: '从事过类似业绩 2 个 (6分)', value: '6' },
-  { label: '从事过类似业绩超过 2 个 (0分)', value: '0' },
+  { label: '未从事过类似项目 (10分)', value: '未从事过类似项目 (10分)' },
+  { label: '从事过类似业绩 1 个 (8分)', value: '从事过类似业绩 1 个 (8分)' },
+  { label: '从事过类似业绩 2 个 (6分)', value: '从事过类似业绩 2 个 (6分)' },
+  { label: '从事过类似业绩超过 2 个 (0分)', value: '从事过类似业绩超过 2 个 (0分)' },
 ];
+
 const subcontractEducationLevels = [
-  { label: '初中及以下超过 20% (10 分)', value: '10' },
-  { label: '初中及以下低于 20% (6 分)', value: '6' },
-  { label: '全部为初中以上 (0 分)', value: '0' },
+  { label: '初中及以下超过 20% (10 分)', value: '初中及以下超过 20% (10 分)' },
+  { label: '初中及以下低于 20% (6 分)', value: '初中及以下低于 20% (6 分)' },
+  { label: '全部为初中以上 (0 分)', value: '全部为初中以上 (0 分)' },
 ];
+
 
 const isRepairProject = computed(() => projectForm.value.project_type === projectTypes[0]);
 const isDrillingProject = computed(() => projectForm.value.project_type === projectTypes[1]);
@@ -314,6 +322,8 @@ const updateConstructionData = (newData) => {
 const handleSave = () => {
   const projectToSave = cloneDeep(projectForm.value);
 
+  console.log('即将发送的项目数据:', JSON.stringify(projectForm.value, null, 2));
+
   try {
     if (currentAction.value === 'create') {
       const newProjectId = (unsubmittedProjects.value.length + 1);
@@ -332,6 +342,7 @@ const handleSave = () => {
     ElMessage.error(`保存项目错误: ${error.message}`);
   }
 };
+
 
 const handleSubmit = () => {
   if (isProjectComplete()) {
