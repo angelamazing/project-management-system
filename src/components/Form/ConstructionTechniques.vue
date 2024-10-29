@@ -2,9 +2,9 @@
   <div>
     <el-form-item label="施工工艺" required>
       <el-radio-group v-model="localForm.constructionType" @change="handleConstructionTypeChange">
-        <el-radio label="地灾治理和矿山生态修复类">地灾治理和矿山生态修复类</el-radio>
-        <el-radio label="钻探类">钻探类</el-radio>
-        <el-radio label="地质调查、测量测绘类">地质调查、测量测绘类</el-radio>
+        <el-radio value="地灾治理和矿山生态修复类">地灾治理和矿山生态修复类</el-radio>
+        <el-radio value="地质勘查钻探类">地质勘查钻探类</el-radio>
+        <el-radio value="地质调查、测量测绘类">地质调查、测量测绘类</el-radio>
       </el-radio-group>
     </el-form-item>
 
@@ -18,17 +18,19 @@
       </el-col>
     </el-row>
 
-    <template v-if="localForm.constructionType === '钻探类'">
+    <template v-if="localForm.constructionType === '地质勘查钻探类'">
       <el-form-item label="大型钻探设备">
         <el-select v-model="localForm.largeDrillingEquipment" placeholder="请选择" @change="emitUpdate">
           <el-option label="无大型钻探设备 (0分)" value="0"></el-option>
-          <el-option label="大型钻探设备或中深孔钻探超过20% (16分)" value="16"></el-option>
+          <el-option label="大型钻探设备或中深孔钻探超过20% (16分)" value="大型钻探设备或中深孔钻探超过20% (16分)"></el-option>
         </el-select>
       </el-form-item>
 
       <el-form-item label="是否存在安全威胁">
         <el-checkbox-group v-model="localForm.safetyThreats" @change="emitUpdate">
-          <el-checkbox v-for="(threat, idx) in safetyThreatOptions" :key="idx" :label="threat.label"></el-checkbox>
+          <el-checkbox v-for="(threat, idx) in safetyThreatOptions" :key="idx" :value="threat.label">
+            {{ threat.label }}
+          </el-checkbox>
         </el-checkbox-group>
       </el-form-item>
     </template>
@@ -191,7 +193,7 @@ export default {
         ],
       },
       {
-        label: '主、被动防护网高度',
+        label: '主被动防护网高度',
         model: '0',
         options: [
           { label: '0m (0分)', value: '0' },

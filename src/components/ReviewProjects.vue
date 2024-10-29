@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-10-17 11:07:08
+ * @LastEditTime: 2024-10-27 17:08:12
  * @FilePath: \project-management-system\src\components\ReviewProjects.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE%E8%AE%BE%E8%AE%BE
 -->
@@ -14,19 +14,18 @@
       <el-table-column prop="status" label="状态"></el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="primary" size="mini" @click="reviewProject(scope.row, '通过')">通过</el-button>
-          <el-button type="danger" size="mini" @click="reviewProject(scope.row, '拒绝')">拒绝</el-button>
-          <el-button size="mini" @click="viewDetails(scope.row)">查看详情</el-button>
+          <el-button type="primary" size="mini" @click="reviewProject(scope.row)">审核</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog
-      v-model="detailDialogVisible"
-      title="项目详情"
+      v-model="reviewDialogVisible"
+      title="项目审核"
       :close-on-click-modal="false"
+      width="80%"
     >
-      <el-form label-width="120px">
+      <el-form :model="currentProject" label-width="120px">
         <el-form-item label="项目名称">
           <el-input v-model="currentProject.name" disabled></el-input>
         </el-form-item>
@@ -39,74 +38,119 @@
         <el-form-item label="描述">
           <el-input type="textarea" v-model="currentProject.description" disabled></el-input>
         </el-form-item>
+        
+        <!-- 添加更多项目详情字段 -->
+
+        <el-divider>审核评分</el-divider>
+
+        <el-form-item label="施工工艺评分">
+          <el-input-number v-model="reviewScores.constructionTechnique" :min="0" :max="100"></el-input-number>
+        </el-form-item>
+        <el-form-item label="项目管理评分">
+          <el-input-number v-model="reviewScores.projectManagement" :min="0" :max="100"></el-input-number>
+        </el-form-item>
+        <el-form-item label="安全措施评分">
+          <el-input-number v-model="reviewScores.safetyMeasures" :min="0" :max="100"></el-input-number>
+        </el-form-item>
+
+        <el-form-item label="审核意见">
+          <el-input type="textarea" v-model="reviewComment" :rows="4"></el-input>
+        </el-form-item>
       </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="reviewDialogVisible = false">取消</el-button>
+          <el-button type="warning" @click="returnProject">退回修改</el-button>
+          <el-button type="primary" @click="submitReview">通过审核</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { ref, reactive } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+
 export default {
   name: 'ReviewProjects',
-  data() {
-    return {
-      projects: [
-        { id: 1, name: '项目A', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目A的描述' },
-        { id: 2, name: '项目B', type: '地质勘察钻探类', status: '待审核', description: '这是项目B的描述' },
-        { id: 3, name: '项目C', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目C的描述' },
-        // 更多模拟项目数据...
-      ],
-      detailDialogVisible: false,
-      currentProject: {}
+  setup() {
+    const projects = ref([
+      { id: 1, name: '项目A', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目A的描述' },
+      { id: 2, name: '项目B', type: '地质勘察钻探类', status: '待审核', description: '这是项目B的描述' },
+      { id: 3, name: '项目C', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目C的描述' },
+    ]);
+
+    const reviewDialogVisible = ref(false);
+    const currentProject = ref({});
+    const reviewScores = reactive({
+      constructionTechnique: 0,
+      projectManagement: 0,
+      safetyMeasures: 0,
+    });
+    const reviewComment = ref('');
+
+    const reviewProject = (project) => {
+      currentProject.value = { ...project };
+      reviewDialogVisible.value = true;
+      // 重置评分和评论
+      Object.keys(reviewScores).forEach(key => reviewScores[key] = 0);
+      reviewComment.value = '';
     };
-  },
-  methods: {
-    async reviewProject(project, decision) {
-      try {
-        await this.$confirm(`你确定要${decision}这个项目吗?`, '确认', {
+
+    const submitReview = () => {
+      // 计算总分
+      const totalScore = Object.values(reviewScores).reduce((sum, score) => sum + score, 0) / 3;
+      
+      // 更新项目状态
+      const index = projects.value.findIndex(p => p.id === currentProject.value.id);
+      if (index !== -1) {
+        projects.value[index].status = totalScore >= 60 ? '审核通过' : '审核未通过';
+        projects.value[index].reviewScore = totalScore;
+        projects.value[index].reviewComment = reviewComment.value;
+        
+        ElMessage.success(`项目审核完成，总分：${totalScore.toFixed(2)}`);
+        reviewDialogVisible.value = false;
+      } else {
+        ElMessage.error('项目未找到，无法更新状态');
+      }
+    };
+
+    const returnProject = () => {
+      ElMessageBox.confirm(
+        '确定要将项目退回修改吗？',
+        '退回确认',
+        {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
-        });
-
-        // 更新项目状态
-        const newStatus = decision === '通过' ? '审核通过' : '审核未通过';
-        this.updateProjectStatus(project, newStatus);
-      } catch (error) {
-        if (error !== 'cancel') {
-          this.$message({
-            type: 'error',
-            message: '操作出现错误，请重试'
-          });
-        } else {
-          this.$message({
-            type: 'info',
-            message: '操作已取消'
-          });
+          type: 'warning',
         }
-      }
-    },
-    updateProjectStatus(project, status) {
-      project.status = status;
-      
-      // 从项目列表中删除审核的项目
-      const index = this.projects.findIndex(p => p.id === project.id);
-      if (index !== -1) {
-        this.projects.splice(index, 1);
-        this.$message({
-          type: 'success',
-          message: `项目已${status === '审核通过' ? '通过' : '拒绝'}`
-        });
-      } else {
-        this.$message({
-          type: 'error',
-          message: '项目未找到，无法更新状态'
-        });
-      }
-    },
-    viewDetails(project) {
-      this.currentProject = { ...project };
-      this.detailDialogVisible = true;
-    }
+      ).then(() => {
+        const index = projects.value.findIndex(p => p.id === currentProject.value.id);
+        if (index !== -1) {
+          projects.value[index].status = '退回修改';
+          projects.value[index].reviewComment = reviewComment.value;
+          
+          ElMessage.success('项目已退回修改');
+          reviewDialogVisible.value = false;
+        } else {
+          ElMessage.error('项目未找到，无法退回');
+        }
+      }).catch(() => {
+        ElMessage.info('已取消退回操作');
+      });
+    };
+
+    return {
+      projects,
+      reviewDialogVisible,
+      currentProject,
+      reviewScores,
+      reviewComment,
+      reviewProject,
+      submitReview,
+      returnProject,
+    };
   }
 };
 </script>

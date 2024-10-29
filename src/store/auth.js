@@ -1,8 +1,8 @@
 /*
  * @Author: Your Name
  * @Date: 2024-10-04 16:06:48
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-10-05 20:54:37
+ * @LastEditors: Jerry Han angelamazing@163.com
+ * @LastEditTime: 2024-10-27 15:38:19
  * @FilePath: \project-management-system\src\store\auth.js
  * @Description: Vuex store for user authentication and authorization management
  */
@@ -17,12 +17,14 @@ export default createStore({
   },
   mutations: {
     setUser(state, user) {
+      console.log('Setting user in store:', user);
       state.user = user;
       state.role = user.role;
       state.permissions = user.permissions;
 
       // 将用户信息存储到 localStorage
       localStorage.setItem('user', JSON.stringify(user));
+   
     },
     clearUser(state) {
       state.user = null;
@@ -36,9 +38,9 @@ export default createStore({
   actions: {
     login({ commit }, credentials) {
       const defaultUsers = [
-        { username: 'admin', password: '123456', role: '管理员', permissions: ['create', 'edit', 'delete', 'view'] },
-        { username: 'user', password: '123456', role: '普通用户', permissions: ['view'] },
-        { username: 'reviewer', password: 'reviewer123', role: '审核员', permissions: ['view', 'review'] }
+        { username: 'admin', password: '123456', role: '管理员', id: 1, permissions: ['create', 'edit', 'delete', 'view'] },
+        { username: 'user', password: '123456', role: '普通用户', id: 2, permissions: ['view'] },
+        { username: 'reviewer', password: 'reviewer123', role: '审核员', id: 3, permissions: ['view', 'review'] }
       ];
 
       const user = defaultUsers.find(
@@ -47,10 +49,12 @@ export default createStore({
 
       if (user) {
         const userData = {
+          id: user.id,
           username: user.username,
           role: user.role,
           permissions: user.permissions,
         };
+        console.log('Login successful, userData:', userData);
         commit('setUser', userData);
         return { success: true };
       } else {
@@ -66,5 +70,6 @@ export default createStore({
     isAuthenticated: state => !!state.user,
     userRole: state => state.user ? state.user.role : null, // 确保从 user 中获取角色
     userPermissions: state => state.user ? state.user.permissions : [], // 确保从 user 中获取权限
+    userId: state => state.user ? state.user.id : null,  // 新增 getter 用于获取用户 ID
   }
 });
