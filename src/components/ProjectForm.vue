@@ -92,11 +92,9 @@
           </el-checkbox-group>
         </el-form-item>
 
-
         <!-- 引入施工工艺组件 -->
         <construction-techniques 
           :initialData="projectForm.construction" 
-          :selectedProjectType="projectForm.project_type"
           @updateData="updateConstructionData" 
         />
 
@@ -168,19 +166,11 @@
           </el-select>
         </el-form-item>
 
-        <!-- 开工和完工日期 -->
-        <el-form-item label="开工日期" required>
-          <el-date-picker v-model="projectForm.start_date" type="date" placeholder="选择开始日期"></el-date-picker>
-        </el-form-item>
-
-        <el-form-item label="完工日期" required>
-          <el-date-picker v-model="projectForm.end_date" type="date" placeholder="选择结束日期"></el-date-picker>
-        </el-form-item>
-
         <!-- 保存和提交按钮 -->
         <el-form-item>
           <el-button type="primary" @click="handleSave">保存项目</el-button>
           <el-button type="success" @click="handleSubmit">提交审核</el-button>
+          <el-button type="info" @click="testBackendInteraction">测试后端交互</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -194,6 +184,7 @@ import { useStore } from 'vuex';
 import ConstructionTechniques from './Form/ConstructionTechniques.vue';
 import { useProjectForm } from '@/composables/useProjectForm';
 import { useUnsubmittedProjects } from '@/composables/useUnsubmittedProjects';
+// 项目表单选项
 import {
   projectTypes,
   repairScales,
@@ -208,9 +199,6 @@ import {
   subcontractExperiences,
   subcontractEducationLevels
 } from '@/constants/projectFormOptions';
-
-const store = useStore();
-const userId = computed(() => store.getters.userId);
 
 const {
   projectForm,
@@ -230,12 +218,16 @@ const {
   deleteProject
 } = useUnsubmittedProjects();
 
+// 状态管理
+const store = useStore();
+const userId = computed(() => store.getters.userId);
+
 // 弹窗状态
 const showDialog = ref(false);
 const currentAction = ref('');
+
 // 弹窗标题
 const dialogTitle = computed(() => currentAction.value === 'create' ? '新建项目' : '编辑项目');
-
 
 // 弹窗操作
 const openCreateDialog = () => {
@@ -247,7 +239,6 @@ const openEditDialog = (project) => {
   resetForm();
   currentAction.value = 'edit';
   Object.assign(projectForm.value, project);
-  console.log(project.id)
   showDialog.value = true;
 };
 const handleSave = () => {
@@ -293,6 +284,21 @@ const confirmDelete = (project) => {
       ElMessage.info('已取消删除');
     });
 };
+
+async function testBackendInteraction() {
+  try {
+    const response = await fetch('http://localhost:3000/api/project');
+    if (!response.ok) {
+      throw new Error('网络响应不是 OK');
+    }
+    const data = await response.json();
+    projectForm.value = data
+    console.log('获取到的项目数据:', data);
+    // 在这里处理获取到的数据
+  } catch (error) {
+    console.error('获取项目数据时出错:', error);
+  }
+}
 </script>
 
 <style scoped>

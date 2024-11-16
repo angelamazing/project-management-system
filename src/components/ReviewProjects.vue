@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-10-27 17:08:12
+ * @LastEditTime: 2024-11-16 15:44:55
  * @FilePath: \project-management-system\src\components\ReviewProjects.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE%E8%AE%BE%E8%AE%BE
 -->
@@ -14,7 +14,7 @@
       <el-table-column prop="status" label="状态"></el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="primary" size="mini" @click="reviewProject(scope.row)">审核</el-button>
+          <el-button type="primary" size="small" @click="reviewProject(scope.row)">审核</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -7,25 +7,28 @@
         placeholder="搜索项目名称"
         prefix-icon="el-icon-search"
         clearable
-        @input="updatePaginatedProjects"
+        @input="updatePaginatedProjects()"
       />
-      <el-select v-model="searchQuery.type" placeholder="选择项目类型" clearable @change="updatePaginatedProjects">
+      <el-select v-model="searchQuery.type" placeholder="选择项目类型" clearable @change="updatePaginatedProjects()">
         <el-option label="所有" value="" />
         <el-option label="地灾治理和矿山生态修复类" value="地灾治理和矿山生态修复类" />
         <el-option label="地质勘察钻探类" value="地质勘察钻探类" />
         <el-option label="地质调查、测量测绘类" value="地质调查、测量测绘类" />
       </el-select>
-      <el-select v-model="searchQuery.status" placeholder="选择审核状态" clearable @change="updatePaginatedProjects">
+      <el-select v-model="searchQuery.status" placeholder="选择审核状态" clearable @change="updatePaginatedProjects()">
         <el-option label="所有" value="" />
         <el-option label="待审核" value="待审核" />
         <el-option label="已审核" value="已审核" />
       </el-select>
-      <el-select v-model="searchQuery.completion" placeholder="选择完成状态" clearable @change="updatePaginatedProjects">
+      <el-select v-model="searchQuery.completion" placeholder="选择完成状态" clearable @change="updatePaginatedProjects()">
         <el-option label="所有" value="" />
         <el-option label="完工" value="完工" />
         <el-option label="未完工" value="未完工" />
       </el-select>
     </div>
+
+    <!-- 测试按钮 -->
+    <el-button type="success" @click="fetchProjects">测试获取项目数据</el-button>
 
     <!-- 表格 -->
     <el-table
@@ -72,7 +75,7 @@ import ProjectDetailsTemplate from './Form/ProjectDetailsTemplate.vue';
 import { nextTick } from 'vue';
 
 // 静态数据
-const allProjects = Array.from({ length: 100 }, (_, index) => ({
+let allProjects = Array.from({ length: 100 }, (_, index) => ({
   id: index + 1,
   name: `项目${index + 1}`,
   type: index % 2 === 0 ? '地质勘察钻探类' : '地灾治理和矿山生态修复类',
@@ -113,6 +116,7 @@ const updatePaginatedProjects = () => {
       return (a[sortProp.value] < b[sortProp.value] ? -1 : 1) * (sortOrder.value === 'ascending' ? 1 : -1);
     });
 
+    // 更新分页数据
     paginatedProjects.value = filteredProjects.slice(start, end);
     total.value = filteredProjects.length;
   } catch (error) {
@@ -140,6 +144,28 @@ const viewProjectDetails = (project) => {
     isDialogVisible.value = true;
   });
 };
+
+async function fetchProjects() {
+  try {
+    const response = await fetch('http://localhost:3000/api/projects');
+    if (!response.ok) {
+      throw new Error('网络响应不是 OK');
+    }
+    const projects = await response.json();
+    console.log('获取到的项目数据:', projects);
+    
+    // 更新项目列表
+    paginatedProjects.value = projects; // 更新项目列表
+    total.value = projects.length; // 更新总数
+    currentPage.value = 1; // 重置当前页为 1
+
+    // 重新计算分页数据
+    allProjects = projects;
+    updatePaginatedProjects();
+  } catch (error) {
+    console.error('获取项目数据时出错:', error);
+  }
+}
 
 // 初始化
 onMounted(() => {
