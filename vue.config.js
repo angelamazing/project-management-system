@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2024-08-30 21:24:17
- * @LastEditTime: 2024-11-16 15:15:20
+ * @LastEditTime: 2024-11-16 16:20:44
  * @LastEditors: Jerry Han angelamazing@163.com
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \project-management-system\vue.config.js
@@ -18,6 +18,10 @@ module.exports = defineConfig({
     proxy: {
         '/api': {
           target: 'http://localhost:3000', // 后端服务地址
+          changeOrigin: true,
+        },
+        '/projectMessages': {
+          target: 'http://192.168.6.116:8080', // 后端服务地址
           changeOrigin: true,
         },
       },
@@ -39,3 +43,11 @@ module.exports = {
     })
   }
 }
+
+
+module.exports = {
+  devServer: {
+    proxy: 'http://192.168.6.116:8080'
+  }
+};
+

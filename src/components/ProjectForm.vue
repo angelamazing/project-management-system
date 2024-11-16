@@ -16,6 +16,11 @@
       </el-table>
     </el-card>
 
+    <!-- 新增按钮用于更改未提交项目列表 -->
+    <el-button type="info" @click="changeUnsubmittedProjects" style="margin-top: 20px;">
+      更改未提交项目列表
+    </el-button>
+
     <!-- 录入项目按钮 -->
     <el-button type="primary" @click="openCreateDialog" style="margin-top: 20px;">
       录入新项目
@@ -184,6 +189,7 @@ import { useStore } from 'vuex';
 import ConstructionTechniques from './Form/ConstructionTechniques.vue';
 import { useProjectForm } from '@/composables/useProjectForm';
 import { useUnsubmittedProjects } from '@/composables/useUnsubmittedProjects';
+import axios from '@/axios'; 
 // 项目表单选项
 import {
   projectTypes,
@@ -226,7 +232,7 @@ const userId = computed(() => store.getters.userId);
 const showDialog = ref(false);
 const currentAction = ref('');
 
-// 弹窗标题
+// 弹���标题
 const dialogTitle = computed(() => currentAction.value === 'create' ? '新建项目' : '编辑项目');
 
 // 弹窗操作
@@ -299,6 +305,20 @@ async function testBackendInteraction() {
     console.error('获取项目数据时出错:', error);
   }
 }
+
+// 新增方法用于更改未提交项目列表
+// 新增方法用于更改未提交项目列表
+const changeUnsubmittedProjects = async () => {
+
+  try {
+    const response = await axios.get("/projectMessages/finds");
+    const result = response.data; // 直接获取响应数据
+    // unsubmittedProjects.value = result; // 更新未提交项目列表
+    console.log(result); // Log the result for debugging
+  } catch (error) {
+    console.error(error);
+  }
+};
 </script>
 
 <style scoped>
