@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2024-08-30 21:24:17
- * @LastEditTime: 2024-11-16 16:20:44
+ * @LastEditTime: 2024-11-17 10:12:49
  * @LastEditors: Jerry Han angelamazing@163.com
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \project-management-system\vue.config.js
@@ -15,11 +15,7 @@ module.exports = defineConfig({
     devtool: 'eval-source-map',},
 
   devServer: {
-    proxy: {
-        '/api': {
-          target: 'http://localhost:3000', // 后端服务地址
-          changeOrigin: true,
-        },
+    proxy: {        
         '/projectMessages': {
           target: 'http://192.168.6.116:8080', // 后端服务地址
           changeOrigin: true,
@@ -29,6 +25,7 @@ module.exports = defineConfig({
   
 
 })
+
 
 // vue.config.js
 module.exports = {
@@ -46,8 +43,14 @@ module.exports = {
 
 
 module.exports = {
-  devServer: {
-    proxy: 'http://192.168.6.116:8080'
+  chainWebpack: (config) => {
+    config.plugin('html').tap(args => {
+      args[0].title = '安全生产风险评估平台'; // 设置网页标题
+      return args;
+    });
   }
 };
+
+
+
 

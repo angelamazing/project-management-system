@@ -1,22 +1,29 @@
-// 在一个独立的文件（如 axios.js）中配置 Axios
+/*
+ * @Author: Jerry Han angelamazing@163.com
+ * @Date: 2024-11-16 17:01:54
+ * @LastEditors: Jerry Han angelamazing@163.com
+ * @LastEditTime: 2024-11-18 09:24:03
+ * @FilePath: \project-management-system\src\axios.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import axios from 'axios';
 
 // 创建 Axios 实例
 const axiosInstance = axios.create({
+  baseURL: 'http://192.168.6.116:8080', // 设置默认请求地址
   timeout: 10000, // 设置超时时间
 });
 
 // 请求拦截器，自动添加 token
 axiosInstance.interceptors.request.use(
   (config) => {
-    
-    const token = localStorage.getItem('token'); // 从本地存储中获取 token
 
+    const token = localStorage.getItem('token'); // 从本地存储中获取 token
+    
     if (token) {
       config.headers.token = token; // 在请求头中添加 Authorization
     }
-    // 打印请求头以进行调试
-    console.log('Request Headers:', config.headers);
+ 
     return config;
   },
   (error) => {
@@ -27,6 +34,7 @@ axiosInstance.interceptors.request.use(
 // 响应拦截器，处理错误或全局响应逻辑
 axiosInstance.interceptors.response.use(
   (response) => response,
+
   (error) => {
     if (error.response && error.response.status === 401) {
       // 处理未授权（401）错误，例如跳转到登录页

@@ -1,11 +1,5 @@
-/*
- * @Author: Jerry Han angelamazing@163.com
- * @Date: 2024-10-27 17:29:20
- * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-10-29 13:39:55
- * @FilePath: \project-management-system\src\constants\projectFormOptions.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
+//静态配置选项
+
 export const projectTypes = ['地灾治理和矿山生态修复类', '地质勘查钻探类', '地质调查、测量测绘类'];
 
 export const repairScales = [
@@ -38,7 +32,7 @@ export const surroundingRisks = [
   { value: '存在三项风险 (8分)', label: '存在三项风险 (8分)' },
   { value: '存在四项风险 (9分)', label: '存在四项风险 (9分)' },
   { value: '存在五项风险 (10分)', label: '存在五项风险 (10分)' },
-  { value: 'custom', label: '其他（自定义）' },
+  { value: 'custom', label: '其他情况' }, 
 ];
 
 export const internalConditions = [

@@ -2,12 +2,13 @@
  * @Author: Your Name
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-10-27 15:38:19
+ * @LastEditTime: 2024-11-18 11:05:14
  * @FilePath: \project-management-system\src\store\auth.js
  * @Description: Vuex store for user authentication and authorization management
  */
 
 import { createStore } from 'vuex';
+import axios from '@/axios';
 
 export default createStore({
   state: {
@@ -36,29 +37,25 @@ export default createStore({
     }
   },
   actions: {
-    login({ commit }, credentials) {
-      const defaultUsers = [
-        { username: 'admin', password: '123456', role: '管理员', id: 1, permissions: ['create', 'edit', 'delete', 'view'] },
-        { username: 'user', password: '123456', role: '普通用户', id: 2, permissions: ['view'] },
-        { username: 'reviewer', password: 'reviewer123', role: '审核员', id: 3, permissions: ['view', 'review'] }
-      ];
+    async login({ commit }, credentials) {
+      try {
+        const response = await axios.post('/login', credentials, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-      const user = defaultUsers.find(
-        u => u.username === credentials.username && u.password === credentials.password
-      );
-
-      if (user) {
-        const userData = {
-          id: user.id,
-          username: user.username,
-          role: user.role,
-          permissions: user.permissions,
-        };
-        console.log('Login successful, userData:', userData);
-        commit('setUser', userData);
-        return { success: true };
-      } else {
-        return { success: false, message: '用户名或密码错误' };
+        if (response.data.code === 1) {
+          const userData = response.data.data;
+          console.log('Login successful, userData:', userData);
+          commit('setUser', userData);
+          return { success: true };
+        } else {
+          return { success: false, message: response.data.message || '用户名或密码错误' };
+        }
+      } catch (error) {
+        console.error('Login failed:', error);
+        return { success: false, message: '登录请求失败，请稍后再试' };
       }
     },
     logout({ commit }) {

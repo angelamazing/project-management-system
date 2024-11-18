@@ -8,9 +8,9 @@
         </el-radio-group>
       </el-form-item>
 
-      <el-row v-if="localForm.constructionType === '地灾治理和矿山生态修复类'" :gutter="20">
-        <el-col v-for="(item, index) in localForm.disasterItems" :key="index" :span="12" class="disaster-col">
-          <el-form-item :label="item.label">
+      <el-row v-if="localForm.constructionType === '地灾治理和矿山生态修复类'" :gutter="10">
+        <el-col v-for="(item, index) in localForm.disasterItems" :key="index" :span="11" class="disaster-col">
+          <el-form-item :label="item.label" class="compact-form-item">
             <el-select v-model="item.model" placeholder="请选择" style="width: 100%; max-width: 300px;" @change="emitUpdate">
               <el-option v-for="(option, idx) in item.options" :key="idx" :label="option.label" :value="option.value"></el-option>
             </el-select>
@@ -152,6 +152,9 @@
     },
     emits: ['updateData'],
     setup(props, { emit }) {
+      // Debugging: Log the initial data
+      
+      
       const localForm = ref(cloneDeep(props.initialData));
 
       const totalScore = computed(() => {
@@ -182,7 +185,7 @@
 
           mainScore = Math.min(mainScore, 15);
           structureScore = Math.min(structureScore, 10);
-          drainageScore = Math.min(drainageScore, 5);
+          drainageScore = Math.min(drainageScore, 5); 
 
           return mainScore + structureScore + drainageScore;
         } else if (localForm.value.constructionType === '地质勘查钻探类') {
@@ -199,33 +202,38 @@
       };
 
       const handleConstructionTypeChange = () => {
-        // 重置相关字段
-        if (localForm.value.constructionType === '地质勘查钻探类') {
+        if (localForm.value.constructionType === '地灾治理和矿山生态修复类') {
+          if (!localForm.value.disasterItems || localForm.value.disasterItems.length === 0) {
+            localForm.value.disasterItems = getDefaultDisasterItems();
+          }
+          console.log('Disaster Items:', localForm.value.disasterItems);
+        } else if (localForm.value.constructionType === '地质勘查钻探类') {
           localForm.value.largeDrillingEquipment = '0';
           localForm.value.safetyThreats = [];
-        } else if (localForm.value.constructionType === '地灾治理和矿山生态修复类') {
-          localForm.value.disasterItems = getDefaultDisasterItems();
-        }
-        // 清除其他类型特有的字段
-        if (localForm.value.constructionType !== '地质勘查钻探类') {
-          delete localForm.value.largeDrillingEquipment;
-          delete localForm.value.safetyThreats;
-        }
-        if (localForm.value.constructionType !== '地灾治理和矿山生态修复类') {
-          delete localForm.value.disasterItems;
         }
         emitUpdate();
       };
 
+      // 修改 watch，添加 immediate
       watch(() => props.initialData, (newValue) => {
-        localForm.value = cloneDeep(newValue);
-      }, { deep: true });
+          if (newValue && Object.keys(newValue).length > 0) {
+            localForm.value = cloneDeep(newValue); // 重置 localForm
+          } else {
+            localForm.value = { constructionType: '' }; // 如果没有数据，重置为默认状态
+          }
+        }, { 
+          deep: true,
+          immediate: true  // 添加 immediate
+        });
 
+      // 修改 onMounted
       onMounted(() => {
+        // 重置 localForm 的状态
+        localForm.value = cloneDeep(props.initialData); // 确保从 props 初始化
         if (Object.keys(localForm.value).length === 0) {
           localForm.value = { constructionType: '' };
         }
-        handleConstructionTypeChange(); // 确保初始状态正确
+        handleConstructionTypeChange();
       });
 
       return {
@@ -239,21 +247,19 @@
   };
   </script>
 
-  <style scoped>
-  .el-form-item {
-    margin-bottom: 15px;
-  }
+<style scoped>
+:deep(.compact-form-item) {
+  margin-bottom: 12px;  /* 增加表单项之间的间距 */
+}
 
-  .el-form-item__label {
-    min-width: 150px;
-    white-space: nowrap;
-  }
+:deep(.compact-form-item .el-form-item__label) {
+  font-size: 12px;  /* 调整标签字体大小 */
+  padding-right: 10px;  /* 增加标签和输入框之间的间距 */
+  line-height: 1.5;  /* 增加标签行高 */
+  width: 110px;  /* 适中标签宽度 */
+}
 
-  .el-input {
-    width: 100%;
-  }
-
-  .disaster-col {
-    margin-bottom: 20px;
-  }
-  </style>
+:deep(.el-select) {
+  width: 100%;  /* 确保选择框宽度一致 */
+}
+</style>
