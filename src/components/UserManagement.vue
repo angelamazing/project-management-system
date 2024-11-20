@@ -8,30 +8,19 @@
 
       <el-table :data="users" style="width: 100%">
         <el-table-column prop="username" label="用户名"></el-table-column>
-        <el-table-column prop="role" label="角色"></el-table-column>
-        <el-table-column prop="permissions" label="额外权限">
-          <template v-slot="scope">
-            <el-tag
-              v-for="permission in scope.row.permissions"
-              :key="permission"
-              type="info"
-              style="margin-right: 4px"
-            >
-              {{ permission }}
-            </el-tag>
-          </template>
-        </el-table-column>
+        <el-table-column prop="permission" label="角色"></el-table-column>
+          
         <el-table-column label="操作">
-          <template v-slot="scope">
-            <el-button @click="editUser(scope.row)" size="mini">编辑</el-button>
-            <el-button @click="deleteUser(scope.row)" type="danger" size="mini">删除</el-button>
+          <template #default="scope">
+            <el-button @click="editUser(scope.row)" size="small">编辑</el-button>
+            <el-button @click="deleteUser(scope.row)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
     <!-- 添加/编辑用户对话框 -->
-    <el-dialog v-model:visible="userDialogVisible" :title="isEditMode ? '编辑用户' : '添加用户'">
+    <el-dialog v-model="userDialogVisible" :title="isEditMode ? '编辑用户' : '添加用户'">
       <el-form :model="userForm" ref="userForm" :rules="rules" label-width="100px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="userForm.username"></el-input>
@@ -39,7 +28,7 @@
         <el-form-item label="角色" prop="role">
           <el-select v-model="userForm.role" placeholder="请选择角色">
             <el-option label="普通用户" value="普通用户"></el-option>
-            <el-option label="审核人员" value="审核人员"></el-option>
+            <el-option label="安全员" value="安全员"></el-option>
             <el-option label="管理员" value="管理员"></el-option>
           </el-select>
         </el-form-item>
@@ -53,7 +42,7 @@
         </el-form-item>
       </el-form>
 
-      <template v-slot:footer>
+      <template #footer>
         <el-button @click="userDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="isEditMode ? updateUser() : addUser()">确认</el-button>
       </template>
@@ -62,93 +51,138 @@
 </template>
 
 <script>
+import { ref, reactive, onMounted } from 'vue';
+import axios from '@/axios';
+import { ElMessage, ElMessageBox } from 'element-plus';
+
 export default {
   name: 'UserManagement',
-  data() {
-    return {
-      users: [
-        {
-          id: 1,
-          username: 'admin',
-          role: '管理员',
-          permissions: ['删除项目'],
-        },
-        {
-          id: 2,
-          username: 'user',
-          role: '普通用户',
-          permissions: ['查看项目总览'],
-        },
-      ],
-      userDialogVisible: false,
-      isEditMode: false,
-      userForm: {
-        id: null,
-        username: '',
-        role: '',
-        permissions: [],
-      },
-      rules: {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        role: [{ required: true, message: '请选择角色', trigger: 'change' }],
-        permissions: [{ required: true, message: '请选择至少一个权限', trigger: 'change' }],
-      },
+  setup() {
+    const users = ref([]);
+    const userDialogVisible = ref(false);
+    const isEditMode = ref(false);
+    const userForm = reactive({
+      id: null,
+      username: '',
+      role: '',
+      permissions: [],
+    });
+    const rules = {
+      username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+      role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+      permissions: [{ required: true, message: '请选择至少一个权限', trigger: 'change' }],
     };
-  },
-  methods: {
-    openAddUserDialog() {
-      this.isEditMode = false;
-      this.userForm = {
+
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('/users/finds');
+        if (response.data.code === 1) {
+          users.value = response.data.data.rows;
+        } else {
+          ElMessage.error(response.data.msg);
+        }
+      } catch (error) {
+        ElMessage.error('Failed to fetch users');
+      }
+    };
+
+    const openAddUserDialog = () => {
+      isEditMode.value = false;
+      Object.assign(userForm, {
         id: null,
         username: '',
         role: '',
         permissions: [],
-      };
-      this.userDialogVisible = true;
-    },
-    editUser(user) {
-      this.isEditMode = true;
-      this.userForm = { ...user };
-      this.userDialogVisible = true;
-    },
-    addUser() {
-      this.$refs.userForm.validate((valid) => {
-        if (valid) {
-          this.userForm.id = this.users.length + 1;
-          this.users.push({ ...this.userForm });
-          this.userDialogVisible = false;
-          this.$message.success('用户添加成功');
-        }
       });
-    },
-    updateUser() {
-      this.$refs.userForm.validate((valid) => {
+      userDialogVisible.value = true;
+    };
+
+    const editUser = (user) => {
+      isEditMode.value = true;
+      Object.assign(userForm, user);
+      userDialogVisible.value = true;
+    };
+
+    const addUser = async () => {
+      const formRef = userForm;
+      formRef.validate(async (valid) => {
         if (valid) {
-          const index = this.users.findIndex(user => user.id === this.userForm.id);
-          if (index !== -1) {
-            this.users.splice(index, 1, { ...this.userForm });
-            this.userDialogVisible = false;
-            this.$message.success('用户更新成功');
+          try {
+            const response = await axios.post('/users/add', userForm);
+            if (response.data.code === 1) {
+              fetchUsers();
+              userDialogVisible.value = false;
+              ElMessage.success('用户添加成功');
+            } else {
+              ElMessage.error(response.data.msg);
+            }
+          } catch (error) {
+            ElMessage.error('Failed to add user');
           }
         }
       });
-    },
-    deleteUser(user) {
-      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+    };
+
+    const updateUser = async () => {
+      const formRef = userForm;
+      formRef.validate(async (valid) => {
+        if (valid) {
+          try {
+            const response = await axios.put('/users/update', userForm);
+            if (response.data.code === 1) {
+              fetchUsers();
+              userDialogVisible.value = false;
+              ElMessage.success('用户更新成功');
+            } else {
+              ElMessage.error(response.data.msg);
+            }
+          } catch (error) {
+            ElMessage.error('Failed to update user');
+          }
+        }
+      });
+    };
+
+    const deleteUser = (user) => {
+      ElMessageBox.confirm('此操作将永久删除该用户, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        const index = this.users.findIndex(u => u.id === user.id);
-        if (index !== -1) {
-          this.users.splice(index, 1);
-          this.$message.success('用户删除成功');
+      }).then(async () => {
+        try {
+          const response = await axios.delete(`/users/delete/${user.id}`);
+          if (response.data.code === 1) {
+            fetchUsers();
+            ElMessage.success('用户删除成功');
+          } else {
+            ElMessage.error(response.data.msg);
+          }
+        } catch (error) {
+          ElMessage.error('Failed to delete user');
         }
       }).catch(() => {
-        this.$message.info('已取消删除');
+        ElMessage.info('已取消删除');
       });
-    },
-  },
+    };
+
+    onMounted(() => {
+      fetchUsers();
+    });
+
+    return {
+      users,
+      userDialogVisible,
+      isEditMode,
+      userForm,
+      rules,
+      fetchUsers,
+      openAddUserDialog,
+      editUser,
+      addUser,
+      updateUser,
+      deleteUser,
+    };
+  }
 };
 </script>
 

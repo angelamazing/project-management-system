@@ -1,7 +1,7 @@
   <template>
     <div>
       <el-form-item label="施工工艺" required>
-        <el-radio-group v-model="localForm.constructionType" @change="handleConstructionTypeChange">
+        <el-radio-group v-model="localForm.constructionType" @change="handleConstructionTypeChange" :disabled="true"> 
           <el-radio value="地灾治理和矿山生态修复类">地灾治理和矿山生态修复类</el-radio>
           <el-radio value="地质勘查钻探类">地质勘查钻探类</el-radio>
           <el-radio value="地质调查、测量测绘类">地质调查、测量测绘类</el-radio>
@@ -42,7 +42,7 @@
   </template>
 
   <script>
-  import { ref, watch, onMounted, computed } from 'vue';
+  import { ref, watch, onMounted, computed, } from 'vue';
   import cloneDeep from 'lodash/cloneDeep';
 
   const safetyThreatOptions = [
@@ -149,12 +149,13 @@
         type: Object,
         default: () => ({}),
       },
+      projectType: {
+        type: String,
+        default: '',
+      },
     },
     emits: ['updateData'],
     setup(props, { emit }) {
-      // Debugging: Log the initial data
-      
-      
       const localForm = ref(cloneDeep(props.initialData));
 
       const totalScore = computed(() => {
@@ -202,11 +203,11 @@
       };
 
       const handleConstructionTypeChange = () => {
+        console.log('Construction Type Changed:', localForm.value.constructionType); // 调试信息
         if (localForm.value.constructionType === '地灾治理和矿山生态修复类') {
           if (!localForm.value.disasterItems || localForm.value.disasterItems.length === 0) {
             localForm.value.disasterItems = getDefaultDisasterItems();
           }
-          console.log('Disaster Items:', localForm.value.disasterItems);
         } else if (localForm.value.constructionType === '地质勘查钻探类') {
           localForm.value.largeDrillingEquipment = '0';
           localForm.value.safetyThreats = [];
@@ -214,26 +215,28 @@
         emitUpdate();
       };
 
-      // 修改 watch，添加 immediate
       watch(() => props.initialData, (newValue) => {
-          if (newValue && Object.keys(newValue).length > 0) {
-            localForm.value = cloneDeep(newValue); // 重置 localForm
-          } else {
-            localForm.value = { constructionType: '' }; // 如果没有数据，重置为默认状态
-          }
-        }, { 
-          deep: true,
-          immediate: true  // 添加 immediate
-        });
+        if (newValue && Object.keys(newValue).length > 0) {
+          localForm.value = cloneDeep(newValue);
+        } else {
+          localForm.value = { constructionType: '' };
+        }
+      }, { deep: true, immediate: true });
 
-      // 修改 onMounted
+      watch(() => props.projectType, (newProjectType) => {
+        console.log('newProjectType', newProjectType); // 调试信息
+        if (newProjectType) {
+          localForm.value.constructionType = newProjectType;
+          handleConstructionTypeChange(); // 确保调用
+        }
+      });
+
       onMounted(() => {
-        // 重置 localForm 的状态
-        localForm.value = cloneDeep(props.initialData); // 确保从 props 初始化
+        localForm.value = cloneDeep(props.initialData);
         if (Object.keys(localForm.value).length === 0) {
           localForm.value = { constructionType: '' };
         }
-        handleConstructionTypeChange();
+        handleConstructionTypeChange(); // 确保在挂载时调用
       });
 
       return {

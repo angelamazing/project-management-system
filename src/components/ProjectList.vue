@@ -7,28 +7,23 @@
         placeholder="搜索项目名称"
         prefix-icon="el-icon-search"
         clearable
-        @input="updatePaginatedProjects()"
+        @input="updatePaginatedProjects"
       />
-      <el-select v-model="searchQuery.type" placeholder="选择项目类型" clearable @change="updatePaginatedProjects()">
+      <el-select v-model="searchQuery.type" placeholder="选择项目类型" clearable @change="updatePaginatedProjects">
         <el-option label="所有" value="" />
         <el-option label="地灾治理和矿山生态修复类" value="地灾治理和矿山生态修复类" />
         <el-option label="地质勘察钻探类" value="地质勘察钻探类" />
         <el-option label="地质调查、测量测绘类" value="地质调查、测量测绘类" />
       </el-select>
-      <el-select v-model="searchQuery.status" placeholder="选择审核状态" clearable @change="updatePaginatedProjects()">
+      <el-select v-model="searchQuery.status" placeholder="选择审核状态" clearable @change="updatePaginatedProjects">
         <el-option label="所有" value="" />
         <el-option label="待审核" value="待审核" />
         <el-option label="已审核" value="已审核" />
       </el-select>
-      <el-select v-model="searchQuery.completion" placeholder="选择完成状态" clearable @change="updatePaginatedProjects()">
-        <el-option label="所有" value="" />
-        <el-option label="完工" value="完工" />
-        <el-option label="未完工" value="未完工" />
-      </el-select>
     </div>
 
-    <!-- 测试按钮 -->
-    <el-button type="success" @click="fetchProjects">测试获取项目数据</el-button>
+    <!-- 手动获取项目数据按钮 -->
+    <el-button type="success" @click="fetchProjects">获取项目数据</el-button>
 
     <!-- 表格 -->
     <el-table
@@ -38,10 +33,10 @@
       @sort-change="handleSortChange"
       highlight-current-row
     >
-      <el-table-column prop="name" label="项目名称" sortable />
-      <el-table-column prop="type" label="项目类型" sortable />
+      <el-table-column prop="projectName" label="项目名称" sortable />
+      <el-table-column prop="projectType" label="项目类型" sortable />
       <el-table-column prop="status" label="状态" sortable />
-      <el-table-column prop="completion" label="完成状态" sortable />
+
       <el-table-column label="操作">
         <template #default="{ row }">
           <el-button
@@ -71,21 +66,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from '@/axios';
 import ProjectDetailsTemplate from './Form/ProjectDetailsTemplate.vue';
 import { nextTick } from 'vue';
 
-// 静态数据
-let allProjects = Array.from({ length: 100 }, (_, index) => ({
-  id: index + 1,
-  name: `项目${index + 1}`,
-  type: index % 2 === 0 ? '地质勘察钻探类' : '地灾治理和矿山生态修复类',
-  status: index % 3 === 0 ? '待审核' : '已审核',
-  completion: index % 2 === 0 ? '完工' : '未完工',
-  description: `这是项目${index + 1}的详细描述。`,
-}));
-
 const paginatedProjects = ref([]);
-const total = ref(allProjects.length);
+const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const sortProp = ref('name');
@@ -102,12 +88,11 @@ const updatePaginatedProjects = () => {
     const end = currentPage.value * pageSize.value;
 
     // 根据搜索条件过滤项目
-    const filteredProjects = allProjects.filter(project => {
+    const filteredProjects = paginatedProjects.value.filter(project => {
       return (
-        (!searchQuery.value.name || project.name.includes(searchQuery.value.name)) &&
-        (!searchQuery.value.type || project.type === searchQuery.value.type) &&
-        (!searchQuery.value.status || project.status === searchQuery.value.status) &&
-        (!searchQuery.value.completion || project.completion === searchQuery.value.completion)
+        (!searchQuery.value.name || project.projectName.includes(searchQuery.value.name)) &&
+        (!searchQuery.value.type || project.projectType === searchQuery.value.type) &&
+        (!searchQuery.value.status || project.status === searchQuery.value.status)
       );
     });
 
@@ -147,29 +132,41 @@ const viewProjectDetails = (project) => {
 
 async function fetchProjects() {
   try {
-    const response = await fetch('http://localhost:3000/api/projects');
-    if (!response.ok) {
-      throw new Error('网络响应不是 OK');
-    }
-    const projects = await response.json();
-    console.log('获取到的项目数据:', projects);
-    
-    // 更新项目列表
-    paginatedProjects.value = projects; // 更新项目列表
-    total.value = projects.length; // 更新总数
-    currentPage.value = 1; // 重置当前页为 1
+    // Construct query parameters
+    const params = {
+      creator: '', // Set this if needed
+      projectName: searchQuery.value.name,
+      projectType: searchQuery.value.type,
+      status: searchQuery.value.status,
+      begin: '', // Set this if needed
+      end: '', // Set this if needed
+      page: 1, // Start from the first page
+      pageSize: 1000, // Set a large number to attempt fetching all data
+    };
 
-    // 重新计算分页数据
-    allProjects = projects;
+    // Fetch data using axios
+    const response = await axios.get('/projectMessages/finds', { params });
+    const data = response.data;
+    console.log('data', data);
+    if (data.code !== 1) {
+      throw new Error(data.msg || 'Failed to fetch project data');
+    }
+
+    // Update project list and pagination
+    paginatedProjects.value = data.data.rows;
+    total.value = data.data.total;
+    currentPage.value = 1; // Reset to first page if needed
+
+    // Recalculate paginated projects
     updatePaginatedProjects();
   } catch (error) {
-    console.error('获取项目数据时出错:', error);
+    console.error('Error fetching project data:', error);
   }
 }
 
 // 初始化
 onMounted(() => {
-  updatePaginatedProjects();
+  fetchProjects(); // Fetch projects when the component is mounted
 });
 </script>
 

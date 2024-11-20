@@ -75,8 +75,10 @@ export function useProjectForm() {
     projectForm.value.constructionProcess = { ...newData };
   };
 
-  const onProjectTypeChange = () => {
+  const onProjectTypeChange = (newType) => {
     projectForm.value.projectScale = '';
+    projectForm.value.projectType = newType; // 更新 projectType
+    console.log('newType', newType);
     // projectForm.value.drill_machine_count = '';
     // projectForm.value.field_investigator_count = '';
   };

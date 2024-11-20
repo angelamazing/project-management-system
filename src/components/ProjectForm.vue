@@ -98,7 +98,7 @@
         <construction-techniques 
           
           :initialData="projectForm.constructionProcess" 
-           v-model="projectForm.projectType"
+          :projectType="projectForm.projectType"
           @updateData="updateConstructionData" 
         />
 
@@ -190,7 +190,7 @@ import { useStore } from 'vuex';
 import ConstructionTechniques from './Form/ConstructionTechniques.vue';
 import { useProjectForm } from '@/composables/useProjectForm';
 import { useUnsubmittedProjects } from '@/composables/useUnsubmittedProjects';
-import axios from '@/axios';
+
 
 
 // 项目表单选项
@@ -282,36 +282,46 @@ const handleSubmit = async () => {
   if (isProjectComplete()) {
     try {
       // 将项目状态设置为 '待审核'
-      projectForm.value.status = '待审核';
+      if (currentAction.value === 'create') {
+        projectForm.value.status = '待审核';
+        if (Array.isArray(projectForm.value.internalConditions)) {
+          projectForm.value.internalConditions = projectForm.value.internalConditions.join(',');
+        }
+        addProject({ ...projectForm.value,creator:username.value})
+      } 
+      else {
+        projectForm.value.status = '待审核';
+        updateProject(projectForm.value);
 
-      if (Array.isArray(projectForm.value.internalConditions)) {
-        projectForm.value.internalConditions = projectForm.value.internalConditions.join(',');
       }
+      showDialog.value = false;
+      resetForm();
+      ElMessage.success('项目已成功提交审核');
 
       // 发送 PUT 请求更新项目
-      const response = await axios.put(`/projectMessages/update`, projectForm.value, {
-        headers: {
-          'Content-Type': 'application/json' // 确保请求头为 JSON 格式
-        }
-      });
+      // const response = await axios.put(`/projectMessages/update`, projectForm.value, {
+      //   headers: {
+      //     'Content-Type': 'application/json' // 确保请求头为 JSON 格式
+      //   }
+      // });
 
-      // 验证响应的 code 是否为 1
-      if (response.data.code === 1) {
-        console.log(JSON.stringify(projectForm.value, null, 2));
+      // // 验证响应的 code 是否为 1
+      // if (response.data.code === 1) {
+      //   console.log(JSON.stringify(projectForm.value, null, 2));
         
-        // 从未提交项目列表中删除该项
-        const projectId = projectForm.value.id; // 获取项目 ID
-        const index = unsubmittedProjects.value.findIndex(p => p.id === projectId);
-        if (index !== -1) {
-          unsubmittedProjects.value.splice(index, 1); // 从列表中删除该项
-        }
+      //   // 从未提交项目列表中删除该项
+      //   const projectId = projectForm.value.id; // 获取项目 ID
+      //   const index = unsubmittedProjects.value.findIndex(p => p.id === projectId);
+      //   if (index !== -1) {
+      //     unsubmittedProjects.value.splice(index, 1); // 从列表中删除该项
+      //   }
 
-        showDialog.value = false;
-        resetForm();
-        ElMessage.success('项目已成功提交审核');
-      } else {
-        ElMessage.error('提交失败，响应代码：' + response.data.code);
-      }
+      //   showDialog.value = false;
+      //   resetForm();
+      //   ElMessage.success('项目已成功提交审核');
+      // } else {
+      //   ElMessage.error('提交失败，响应代码：' + response.data.code);
+      // }
     } catch (error) {
       console.error('提交项目时出错:', error);
       ElMessage.error('提交项目时出错: ' + error.message);
