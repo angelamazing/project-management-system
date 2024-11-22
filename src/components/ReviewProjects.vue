@@ -1,16 +1,16 @@
 <!--
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
- * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-11-16 15:44:55
+ * @LastEditors: Jerry House angelamazing@163.com
+ * @LastEditTime: 2024-11-22 16:46:33
  * @FilePath: \project-management-system\src\components\ReviewProjects.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE%E8%AE%BE%E8%AE%BE
 -->
 <template>
   <div class="review-projects">
     <el-table :data="projects" style="width: 100%">
-      <el-table-column prop="name" label="项目名称"></el-table-column>
-      <el-table-column prop="type" label="项目类型"></el-table-column>
+      <el-table-column prop="projectName" label="项目名称"></el-table-column>
+      <el-table-column prop="projectType" label="项目类型"></el-table-column>
       <el-table-column prop="status" label="状态"></el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
@@ -25,43 +25,72 @@
       :close-on-click-modal="false"
       width="80%"
     >
-      <el-form :model="currentProject" label-width="120px">
-        <el-form-item label="项目名称">
-          <el-input v-model="currentProject.name" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="项目类型">
-          <el-input v-model="currentProject.type" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-input v-model="currentProject.status" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input type="textarea" v-model="currentProject.description" disabled></el-input>
-        </el-form-item>
-        
-        <!-- 添加更多项目详情字段 -->
+      <div class="dialog-content">
+        <div class="project-details">
+          <h3>项目基础信息</h3>
+          <p><strong>项目名称:</strong> {{ currentProject.projectName }}</p>
+          <p><strong>创建人:</strong> {{ currentProject.creator }}</p>
+          <p><strong>状态:</strong> {{ currentProject.status }}</p>
+          <p><strong>项目类型:</strong> {{ currentProject.projectType }}</p>
+          <p><strong>项目规模:</strong> {{ currentProject.projectScale }}</p>
+          <p><strong>周边环境:</strong> {{ currentProject.surroundingRisks }}</p>
+          <p><strong>内部环境:</strong> {{ currentProject.internalConditions }}</p>
+          <p><strong>其他说明:</strong> {{ currentProject.customSurroundingRisks }}</p>
 
-        <el-divider>审核评分</el-divider>
+          <h3>施工工艺</h3>
+          <ul>
+            <li v-for="item in formattedConstructionProcess" :key="item.label">
+              <strong>{{ item.label }}:</strong> {{ item.selectedLabel }}
+            </li>
+          </ul>
 
-        <el-form-item label="施工工艺评分">
-          <el-input-number v-model="reviewScores.constructionTechnique" :min="0" :max="100"></el-input-number>
-        </el-form-item>
-        <el-form-item label="项目管理评分">
-          <el-input-number v-model="reviewScores.projectManagement" :min="0" :max="100"></el-input-number>
-        </el-form-item>
-        <el-form-item label="安全措施评分">
-          <el-input-number v-model="reviewScores.safetyMeasures" :min="0" :max="100"></el-input-number>
-        </el-form-item>
+          <h3>团队管理信息</h3>
+          <p><strong>管理经验:</strong> {{ currentProject.managementExperience }}</p>
+          <p><strong>专业构:</strong> {{ currentProject.professionalStructure }}</p>
+          <p><strong>学历层次:</strong> {{ currentProject.educationLevel }}</p>
 
-        <el-form-item label="审核意见">
-          <el-input type="textarea" v-model="reviewComment" :rows="4"></el-input>
-        </el-form-item>
-      </el-form>
+          <h3>分包队伍信息</h3>
+          <p><strong>队伍平均年龄:</strong> {{ currentProject.subcontractAvgAge }}</p>
+          <p><strong>队伍经验:</strong> {{ currentProject.subcontractExperience }}</p>
+          <p><strong>队伍学历:</strong> {{ currentProject.subcontractEducation }}</p>
+        </div>
+
+        <div class="review-section">
+          <div class="review-scores">
+            <el-divider>初始得分信息</el-divider>
+            <h4>项目基础信息得分: {{ partialScores[0] }}</h4>
+            <h4>施工工艺得分: {{ partialScores[1] }}</h4>
+            <h4>团队管理信息得分: {{ partialScores[2] }}</h4>
+            <h4>分包队伍信息得分: {{ partialScores[3] }}</h4>
+          </div>
+
+          <div class="review-inputs">
+            <el-divider>审核信息</el-divider>
+            <el-form>
+              <el-form-item label="项目基础信息得分" class="review-form-item">
+                <el-input-number v-model="adjustedScores.constructionTechnique" :min="0" :max="100" :step="1"></el-input-number>
+              </el-form-item>
+              <el-form-item label="施工工艺得分" class="review-form-item">
+                <el-input-number v-model="adjustedScores.projectManagement" :min="0" :max="100" :step="1"></el-input-number>
+              </el-form-item>
+              <el-form-item label="团队管理信息得分" class="review-form-item">
+                <el-input-number v-model="adjustedScores.safetyMeasures" :min="0" :max="100" :step="1"></el-input-number>
+              </el-form-item>
+              <el-form-item label="分包队伍信息得分" class="review-form-item">
+                <el-input-number v-model="adjustedScores.subcontractTeam" :min="0" :max="100" :step="1"></el-input-number>
+              </el-form-item>
+              <el-form-item label="评审意见" class="review-form-item">
+                <el-input v-model="reviewComment" type="textarea"></el-input>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </div>
+
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="reviewDialogVisible = false">取消</el-button>
-          <el-button type="warning" @click="returnProject">退回修改</el-button>
-          <el-button type="primary" @click="submitReview">通过审核</el-button>
+          <el-button type="primary" @click="submitReview">审核</el-button>
         </span>
       </template>
     </el-dialog>
@@ -69,17 +98,69 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import axios from '@/axios';
 
 export default {
   name: 'ReviewProjects',
   setup() {
-    const projects = ref([
-      { id: 1, name: '项目A', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目A的描述' },
-      { id: 2, name: '项目B', type: '地质勘察钻探类', status: '待审核', description: '这是项目B的描述' },
-      { id: 3, name: '项目C', type: '地灾治理和矿山生态修复类', status: '待审核', description: '这是项目C的描述' },
-    ]);
+    const projects = ref([]);
+    
+    const fetchProjectDetails = async (id) => {
+      try {
+        const response = await axios.get(`/projectApprovals/find/${id}`);
+        if (response.data.code === 1) {
+          currentProject.value = response.data.data;
+          currentProject.value.id = id;
+          console.log(currentProject.value.id)
+          
+          
+          if (typeof response.data.data.partialScore === 'string') {
+            const scores = response.data.data.partialScore.split(',').map(Number);
+            reviewScores.constructionTechnique = scores[0] || 0;
+            reviewScores.projectManagement = scores[1] || 0;
+            reviewScores.safetyMeasures = scores[2] || 0;
+          }
+        } else {
+          ElMessage.error(response.data.msg);
+        }
+      } catch (error) {
+        ElMessage.error('获取项目详细信息失败');
+      }
+    };
+
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get('/projectMessages/finds', {
+          params: {
+            status: "待审核",
+            page: 1,
+            pageSize: 10
+          }
+        });
+        if (response.data.code === 1) {
+          projects.value = response.data.data.rows;
+        } else {
+          ElMessage.error(response.data.msg);
+        }
+      } catch (error) {
+        ElMessage.error('获取项目列表失败');
+      }
+    };
+
+    const reviewProject = async (project) => {
+      reviewDialogVisible.value = true;
+      await fetchProjectDetails(project.id);
+      
+      adjustedScores.constructionTechnique = Number(partialScores.value[0]) || 0;
+      adjustedScores.projectManagement = Number(partialScores.value[1]) || 0;
+      adjustedScores.safetyMeasures = Number(partialScores.value[2]) || 0;
+      adjustedScores.subcontractTeam = Number(partialScores.value[3]) || 0;
+      reviewComment.value = '';
+    };
+
+    fetchProjects();
 
     const reviewDialogVisible = ref(false);
     const currentProject = ref({});
@@ -90,29 +171,81 @@ export default {
     });
     const reviewComment = ref('');
 
-    const reviewProject = (project) => {
-      currentProject.value = { ...project };
-      reviewDialogVisible.value = true;
-      // 重置评分和评论
-      Object.keys(reviewScores).forEach(key => reviewScores[key] = 0);
-      reviewComment.value = '';
-    };
+    const adjustedScores = reactive({
+      constructionTechnique: 0,
+      projectManagement: 0,
+      safetyMeasures: 0,
+      subcontractTeam: 0,
+    });
 
-    const submitReview = () => {
-      // 计算总分
-      const totalScore = Object.values(reviewScores).reduce((sum, score) => sum + score, 0) / 3;
+    const partialScores = computed(() => {
+      return currentProject.value.partialScore ? currentProject.value.partialScore.split('，') : [];
+    });
+
+    const formattedConstructionProcess = computed(() => {
+      if (!currentProject.value.constructionProcess) {
+        return [];
+      }
+
+      const result = [];
       
-      // 更新项目状态
-      const index = projects.value.findIndex(p => p.id === currentProject.value.id);
-      if (index !== -1) {
-        projects.value[index].status = totalScore >= 60 ? '审核通过' : '审核未通过';
-        projects.value[index].reviewScore = totalScore;
-        projects.value[index].reviewComment = reviewComment.value;
+      if (currentProject.value.constructionProcess.disasterItems) {
+        const disasterItems = currentProject.value.constructionProcess.disasterItems
+          .map(item => {
+            const selectedOption = item.options.find(option => option.value === item.model);
+            return {
+              label: item.label,
+              selectedLabel: selectedOption ? selectedOption.label : ''
+            };
+          })
+          .filter(item => item.selectedLabel && !item.selectedLabel.includes('0分'));
+        result.push(...disasterItems);
+      }
+
+      if (currentProject.value.constructionProcess.constructionType === '地质勘察钻探类') {
+        const equipmentValue = currentProject.value.constructionProcess.largeDrillingEquipment;
+        const equipmentLabel = equipmentValue === '16' 
+          ? '大型钻探设备或中深孔钻探超过20% (16分)'
+          : '无大型钻探设备 (0分)';
         
-        ElMessage.success(`项目审核完成，总分：${totalScore.toFixed(2)}`);
-        reviewDialogVisible.value = false;
-      } else {
-        ElMessage.error('项目未找到，无法更新状态');
+        result.push({
+          label: '钻探设备',
+          selectedLabel: equipmentLabel
+        });
+
+        if (currentProject.value.constructionProcess.safetyThreats?.length > 0) {
+          result.push({
+            label: '安全威胁',
+            selectedLabel: currentProject.value.constructionProcess.safetyThreats.join('、')
+          });
+        }
+      }
+
+      return result;
+    });
+
+    const submitReview = async () => {
+      try {
+        console.log(currentProject.value.id)
+        const totalScore = Object.values(adjustedScores).reduce((sum, score) => sum + score, 0);
+        const response = await axios.put('/projectApprovals/update', {
+          projectId: currentProject.value.id,
+          reviewComments: reviewComment.value,
+          status: '已审核',
+          partialScore: Object.values(adjustedScores).join(','),
+          totalScore: totalScore
+          
+        })
+   
+        if (response.data.code === 1) {
+          ElMessage.success('审核提交成功');
+          reviewDialogVisible.value = false;
+          fetchProjects(); // Refresh the project list
+        } else {
+          ElMessage.error(response.data.msg);
+        }
+      } catch (error) {
+        ElMessage.error('提交审核失败');
       }
     };
 
@@ -150,6 +283,9 @@ export default {
       reviewProject,
       submitReview,
       returnProject,
+      formattedConstructionProcess,
+      adjustedScores,
+      partialScores,
     };
   }
 };
@@ -160,7 +296,41 @@ export default {
   padding: 20px;
 }
 
+.dialog-content {
+  display: flex;
+}
+
+.project-details {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.review-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-scores {
+  margin-bottom: 20px;
+}
+
+.review-inputs {
+  margin-top: 20px;
+}
+
 .dialog-footer {
   text-align: right;
+}
+
+.review-form-item :deep(.el-form-item__label) {
+  width: 130px;  /* 设置固定宽度 */
+  text-align: right;
+  margin-right: 12px;
+}
+
+.review-form-item {
+  display: flex;
+  align-items: center;
 }
 </style>

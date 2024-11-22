@@ -1,8 +1,8 @@
 /*
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-10-08 09:09:58
+ * @LastEditors: Jerry House angelamazing@163.com
+ * @LastEditTime: 2024-11-22 14:54:44
  * @FilePath: \project-management-system\src\router\index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -14,7 +14,7 @@ import Users from '../components/UserManagement.vue';
 import SystemLogs from '../components/SystemLogs.vue';
 import ProjectOverview from '../components/ProjectOverview.vue';
 import ReviewProjects from '../components/ReviewProjects.vue';
-import store from '../store/auth'; // 确保引用的是正确的 Vuex 存储
+import store from '@/store/auth'
 
 const routes = [
   { path: '/', component: LoginPage },
@@ -26,12 +26,12 @@ const routes = [
       { 
         path: 'projects', 
         component: ProjectList,
-        meta: { requiredRoles: ['普通用户', '审核员', '管理员'], requiresAuth: true }
+        meta: { requiredRoles: ['普通用户', '安全员', '管理员'], requiresAuth: true }
       },
       { 
         path: 'new-project', 
         component: () => import('../components/ProjectForm.vue'), 
-        meta: { requiredRoles: ['普通用户', '审核员', '管理员'], requiresAuth: true } 
+        meta: { requiredRoles: ['普通用户',  '管理员'], requiresAuth: true } 
       },
       { 
         path: 'users', 
@@ -46,12 +46,12 @@ const routes = [
       { 
         path: 'overview', 
         component: ProjectOverview,
-        meta: { requiredRoles: ['管理员', '审核员'], requiresAuth: true }
+        meta: { requiredRoles: ['普通用户', '安全员', '管理员'], requiresAuth: true }
       },
       { 
         path: 'review', 
         component: ReviewProjects,
-        meta: { requiredRoles: ['审核员', '管理员'], requiresAuth: true }
+        meta: { requiredRoles: ['安全员', '管理员'], requiresAuth: true }
       },
     ]
   },
@@ -63,17 +63,22 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.getters.isAuthenticated; // 获取用户是否认证
-  const userRole = store.getters.userRole; // 获取用户角色
+  // console.log('路由守卫检查权限');
+  // console.log('当前用户状态:', store.state.user);
+  // console.log('目标路由:', to.path);
 
-  // 检查需要认证的路由
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ path: '/' }); // 未认证重定向到登录页面
-  } else if (to.meta.requiredRoles && !to.meta.requiredRoles.includes(userRole)) {
-    alert('您没有访问该页面的权限'); // 权限不足提示
-    next(false); // 取消导航
+  const isAuthenticated = store.getters.isAuthenticated;
+  
+  if (to.path === '/login') {
+    if (isAuthenticated) {
+      next('/dashboard');
+    } else {
+      next();
+    }
+  } else if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/');
   } else {
-    next(); // 继续导航
+    next();
   }
 });
 

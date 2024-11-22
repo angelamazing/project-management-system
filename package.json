@@ -19,7 +19,8 @@
     "vue-echarts": "^7.0.3",
     "vue-jest": "^5.0.0-alpha.10",
     "vue-router": "^4.4.3",
-    "vuex": "^4.1.0"
+    "vuex": "^4.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

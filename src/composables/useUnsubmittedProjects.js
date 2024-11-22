@@ -1,8 +1,8 @@
 /*
  * @Author: Jerry Han angelamazing@163.com
  * @Date: 2024-10-27 17:29:30
- * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-11-19 15:58:04
+ * @LastEditors: Jerry House angelamazing@163.com
+ * @LastEditTime: 2024-11-22 14:50:51
  * @FilePath: \project-management-system\src\composables\useUnsubmittedProjects.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -35,6 +35,7 @@ export function useUnsubmittedProjects() {
         return row;
       });
       unsubmittedProjects.value = updatedRows; // Assuming the data is in response.data.rows
+
     } catch (error) {
       console.error('Failed to fetch projects:', error);
     }
@@ -43,7 +44,7 @@ export function useUnsubmittedProjects() {
   const addProject = async (project) => {
     try {
       // Ensure internalConditions is a string before sending
-      console.log(JSON.stringify(project.internalConditions, null, 2));
+      // console.log(JSON.stringify(project.internalConditions, null, 2));
       if (Array.isArray(project.internalConditions)) {
         project.internalConditions = project.internalConditions.join(',');
       } 
@@ -58,8 +59,8 @@ export function useUnsubmittedProjects() {
       if(project.status === '未提交'){
         unsubmittedProjects.value.push(project);
       }
-      console.log('response.data', response.data);
-      console.log('Current unsubmittedProjects:', unsubmittedProjects.value);
+      // console.log('response.data', response.data);
+      // console.log('Current unsubmittedProjects:', unsubmittedProjects.value);
 
     } catch (error) {
       console.error('Failed to add project:', error);
@@ -85,16 +86,16 @@ export function useUnsubmittedProjects() {
         if (response.data.code === 1) {
           const updatedData = response.data.data; // 假设响应包含更新后的项目数据
           
-          console.log('updatedData', updatedData);
+          // console.log('updatedData', updatedData);
           // Check if updatedData.internalConditions is a string before splitting
         if (typeof updatedData.internalConditions === 'string') {
           updatedData.internalConditions = updatedData.internalConditions.split(',');
           }
-          console.log('updatedData.internalConditions', updatedData.internalConditions);
+          // console.log('updatedData.internalConditions', updatedData.internalConditions);
 
           // 更新本地的 unsubmittedProjects
           const index = unsubmittedProjects.value.findIndex(p => p.id === id);
-          console.log(unsubmittedProjects.value);
+          // console.log(unsubmittedProjects.value);
           if (index !== -1 && updatedData.status === '未提交') {
             unsubmittedProjects.value[index] = updatedData; // 更新对应的项目
           }
@@ -103,7 +104,7 @@ export function useUnsubmittedProjects() {
             unsubmittedProjects.value = unsubmittedProjects.value.filter(p => p.id !== id);
           }
 
-          console.log('Project updated successfully:', JSON.stringify(updatedData, null, 2));
+          // console.log('Project updated successfully:', JSON.stringify(updatedData, null, 2));
         } else {
           console.error('Update failed, response code:', response.data.code);
         }

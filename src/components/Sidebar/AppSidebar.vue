@@ -9,10 +9,10 @@
 <template>
   <el-menu default-active="1" class="el-menu-vertical-demo" @select="handleSelect">
     <el-menu-item index="1">首页</el-menu-item>
-    <el-menu-item index="2" v-if="hasRole(['普通用户', '审核员', '管理员'])">新建项目</el-menu-item>
-    <el-menu-item index="3" v-if="hasRole(['普通用户', '审核员', '管理员'])">查看项目</el-menu-item>
-    <el-menu-item index="7" v-if="hasRole(['审核员', '管理员'])">审核项目</el-menu-item>
-    <el-menu-item index="4" v-if="hasRole(['审核员', '管理员'])">项目总览</el-menu-item>
+    <el-menu-item index="2" v-if="hasRole(['普通用户',  '管理员'])">新建项目</el-menu-item>
+    <el-menu-item index="3" v-if="hasRole(['普通用户', '安全员', '管理员'])">查看项目</el-menu-item>
+    <el-menu-item index="7" v-if="hasRole(['安全员', '管理员'])">审核项目</el-menu-item>
+    <el-menu-item index="4" v-if="hasRole(['普通用户','安全员', '管理员'])">项目总览</el-menu-item>
     <el-menu-item index="5" v-if="hasRole(['管理员'])">用户管理</el-menu-item>
     <el-menu-item index="6" v-if="hasRole(['管理员'])">系统日志</el-menu-item>
   </el-menu>

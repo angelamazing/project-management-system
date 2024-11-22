@@ -95,11 +95,13 @@
         </el-form-item>
 
         <!-- 引入施工工艺组件 -->
+        <h4 style="text-align: center;">施工工艺</h4>
         <construction-techniques 
-          
+          ref="constructionTechniquesRef"
           :initialData="projectForm.constructionProcess" 
           :projectType="projectForm.projectType"
-          @updateData="updateConstructionData" 
+          @updateData="updateConstructionData"
+          @updateTotalScore="updateConstructionProcessScore"
         />
 
         <!-- 团队管理信息 -->
@@ -176,7 +178,8 @@
         <el-form-item>
           <el-button type="primary" @click="handleSave">保存项目</el-button>
           <el-button type="success" @click="handleSubmit">提交审核</el-button>
-          <el-button type="info" @click="testBackendInteraction">测试后端交互</el-button>
+          <el-button type="info" @click="calculateProjectScore">计算项目分数</el-button>
+          
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -242,8 +245,8 @@ const dialogTitle = computed(() => currentAction.value === 'create' ? '新建项
 // 弹窗操作
 const openCreateDialog = () => {
   resetForm();
-  console.log('After reset:', JSON.stringify(projectForm.value, null, 2)); // 检查重置后的值
-  console.log('projectForm.constructionProcess:', projectForm.value.constructionProcess);
+  // console.log('After reset:', JSON.stringify(projectForm.value, null, 2)); // 检查重置后的值
+  // console.log('projectForm.constructionProcess:', projectForm.value.constructionProcess);
   
   currentAction.value = 'create';
   showDialog.value = true;
@@ -256,12 +259,12 @@ const openEditDialog = (project) => {
 
   Object.assign(projectForm.value, project);
   
-  console.log('project.internalConditions',project.internalConditions)
+  // console.log('project.internalConditions',project.internalConditions)
   
   if(project.internalConditions.length == 1){
     projectForm.value.internalConditions = project.internalConditions[0].split(',')
   }
-  console.log('projectForm.value.internalConditions',projectForm.value.internalConditions)
+  // console.log('projectForm.value.internalConditions',projectForm.value.internalConditions)
   showDialog.value = true;
 };
 const handleSave = () => {
@@ -281,12 +284,16 @@ const handleSave = () => {
 const handleSubmit = async () => {
   if (isProjectComplete()) {
     try {
+      const scores = calculateProjectScore();
+      projectForm.value.partialScore = scores.partialScores.join('，');
+      projectForm.value.totalScore = scores.totalScore.toString();
       // 将项目状态设置为 '待审核'
       if (currentAction.value === 'create') {
         projectForm.value.status = '待审核';
         if (Array.isArray(projectForm.value.internalConditions)) {
           projectForm.value.internalConditions = projectForm.value.internalConditions.join(',');
         }
+
         addProject({ ...projectForm.value,creator:username.value})
       } 
       else {
@@ -297,31 +304,7 @@ const handleSubmit = async () => {
       showDialog.value = false;
       resetForm();
       ElMessage.success('项目已成功提交审核');
-
-      // 发送 PUT 请求更新项目
-      // const response = await axios.put(`/projectMessages/update`, projectForm.value, {
-      //   headers: {
-      //     'Content-Type': 'application/json' // 确保请求头为 JSON 格式
-      //   }
-      // });
-
-      // // 验证响应的 code 是否为 1
-      // if (response.data.code === 1) {
-      //   console.log(JSON.stringify(projectForm.value, null, 2));
-        
-      //   // 从未提交项目列表中删除该项
-      //   const projectId = projectForm.value.id; // 获取项目 ID
-      //   const index = unsubmittedProjects.value.findIndex(p => p.id === projectId);
-      //   if (index !== -1) {
-      //     unsubmittedProjects.value.splice(index, 1); // 从列表中删除该项
-      //   }
-
-      //   showDialog.value = false;
-      //   resetForm();
-      //   ElMessage.success('项目已成功提交审核');
-      // } else {
-      //   ElMessage.error('提交失败，响应代码：' + response.data.code);
-      // }
+    
     } catch (error) {
       console.error('提交项目时出错:', error);
       ElMessage.error('提交项目时出错: ' + error.message);
@@ -330,6 +313,47 @@ const handleSubmit = async () => {
     ElMessage.warning('请填写所有必填信息后再提交审核');
   }
 };
+
+const constructionProcessScore = ref(0);
+
+const updateConstructionProcessScore = (score) => {
+  constructionProcessScore.value = score;
+};
+
+const calculateProjectScore = () => {
+  const extractScore = (text) => {
+    const match = text.match(/(\d+)\s*分/); // 修改正则表达式以处理空格
+    return match ? parseInt(match[1], 10) : 0;
+  };
+
+  // 计算项目基础信息部分的分数
+  const projectScaleScore = extractScore(projectForm.value.projectScale);
+  const surroundingRisksScore = extractScore(projectForm.value.surroundingRisks);
+  const internalConditionsScore = 10 - (projectForm.value.internalConditions?.length || 0); // 计算internalConditions的分数
+  const basicInfoScore = projectScaleScore + surroundingRisksScore + internalConditionsScore;
+
+
+  // 计算团队管理信息部分的分数
+  const managementExperienceScore = extractScore(projectForm.value.managementExperience);
+  const professionalStructureScore = extractScore(projectForm.value.professionalStructure);
+  const educationLevelScore = extractScore(projectForm.value.educationLevel);
+  const managementScore = managementExperienceScore + professionalStructureScore + educationLevelScore;
+
+  // 计算分包队伍信息部分的分数
+  const subcontractAvgAgeScore = extractScore(projectForm.value.subcontractAvgAge); 
+  const subcontractExperienceScore = extractScore(projectForm.value.subcontractExperience);
+  const subcontractEducationScore = extractScore(projectForm.value.subcontractEducation);
+  const subcontractScore = subcontractAvgAgeScore + subcontractExperienceScore + subcontractEducationScore;
+
+  const totalScore = basicInfoScore + managementScore + subcontractScore + constructionProcessScore.value;
+  ElMessage.info(`项目基础信息分数: ${basicInfoScore}, 施工工艺分数: ${constructionProcessScore.value}, 团队管理信息分数: ${managementScore}, 分包队伍信息分数: ${subcontractScore}, 总分: ${totalScore}`);
+  return {
+    partialScores: [basicInfoScore, constructionProcessScore.value, managementScore, subcontractScore],
+    totalScore: totalScore
+  };
+};
+
+
 const confirmDelete = (project) => {
   ElMessageBox.confirm(
     `确定要删除项目 "${project.projectName}" 吗？`,
@@ -349,20 +373,7 @@ const confirmDelete = (project) => {
     });
 };
 
-async function testBackendInteraction() {
-  try {
-    const response = await fetch('http://localhost:3000/api/project');
-    if (!response.ok) {
-      throw new Error('网络响应不是 OK');
-    }
-    const data = await response.json();
-    projectForm.value = data
-    console.log('获取到的项目数据:', data);
-    // 在这里处理获取到的数据
-  } catch (error) {
-    console.error('获取项目数据时出错:', error);
-  }
-}
+
 
 
 

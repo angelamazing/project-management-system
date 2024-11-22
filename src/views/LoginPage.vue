@@ -1,8 +1,8 @@
 <!--
  * @Author: Jerry Han angelamazing@163.com
  * @Date: 2024-10-22 15:44:18
- * @LastEditors: Jerry Han angelamazing@163.com
- * @LastEditTime: 2024-11-18 11:17:50
+ * @LastEditors: Jerry House angelamazing@163.com
+ * @LastEditTime: 2024-11-22 14:48:22
  * @FilePath: \project-management-system\src\views\LoginPage.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -18,7 +18,9 @@
           <el-input v-model="loginForm.password" type="password" name="password" placeholder="密码" required></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleLogin">登录</el-button>
+          <el-button type="primary" @click="handleLogin" :loading="loading" :disabled="loading">
+            {{ loading ? '登录中...' : '登录' }}
+          </el-button>
         </el-form-item>
         <el-form-item>
           <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
@@ -44,52 +46,79 @@ export default {
       rules: {
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-      }
+      },
+      loading: false, // 添加loading状态
     };
   },
   methods: {
-    ...mapActions(['login']),
+    ...mapActions(['login', 'logout']),
     async handleLogin() {
+      if (this.loading) return;
+      this.loading = true;      
+      // console.log(`当前登录请求的服务器地址: ${axios.defaults.baseURL}`); // 打印服务器地址
+
       this.$refs.loginForm.validate(async (valid) => {
         if (valid) {
-          console.log(`当前登录请求的服务器地址: ${axios.defaults.baseURL}`); // 打印服务器地址
           try {
-            const response = await axios.post('/login', { // 发送真实的登录请求
+
+            const response = await axios.post('/login', {
               username: this.loginForm.username,
               password: this.loginForm.password
             }, {
+              timeout: 10000, // 设置超时时间为10秒
               headers: {
-                'Content-Type': 'application/json' // 确保请求体为 JSON 格式
+                'Content-Type': 'application/json'
               }
             });
+     
+            if (response.status == 200) {
+              try {
             
-            
-            if (response.data.code == 1) {
-              console.log(response.data); 
-              const user = {
-                username: this.loginForm.username,
-                role: response.data.msg // Assuming "msg" is the role or user type
-              };
-              localStorage.setItem('user', JSON.stringify(user));
-              console.log('user:',user);
-
-              localStorage.setItem('token',response.data.data)
-             
-              this.$router.push('/dashboard'); // 登录成功后跳转
+                
+                // 使用 Vuex action 处理登录
+                const result = await this.$store.dispatch('login', {
+                  username: this.loginForm.username,
+                  token: response.data.data.jwtToken,
+                  role: response.data.data.permission,
+                  id:response.data.data.id
+                });
+         
               
+
+                if (result.success) {
+                  // console.log('Vuex 登录成功，准备跳转');
+                  await this.$router.push('/dashboard');
+                } else {
+                  this.errorMessage = result.message || '登录失败';
+                }
+                
+              } catch (error) {
+                console.error('登录处理错误:', error);
+                this.errorMessage = '登录失败，请重试';
+              }
             } else {
               this.errorMessage = response.data.message || '用户名或密码错误';
             }
           } catch (error) {
-            
-            this.errorMessage = '登录请求失败，请稍后再试'; // 处理请求错误
-            
-            
+            console.error('登录错误详情:', {
+              message: error.message,
+              status: error.response?.status,
+              data: error.response?.data
+            });
+            this.errorMessage = '登录请求失败，请稍后再试';
+          } finally {
+            this.loading = false;
           }
         } else {
+          this.loading = false;
+          console.log('表单验证失败'); // 添加日志
           this.errorMessage = '请填写完整的登录信息';
         }
       });
+    },
+    handleLogout() {
+      this.logout();
+      this.$router.push('/login');
     }
   }
 };

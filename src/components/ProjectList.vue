@@ -7,23 +7,21 @@
         placeholder="搜索项目名称"
         prefix-icon="el-icon-search"
         clearable
-        @input="updatePaginatedProjects"
+        @input="handleSearchChange"
       />
-      <el-select v-model="searchQuery.type" placeholder="选择项目类型" clearable @change="updatePaginatedProjects">
+      <el-select v-model="searchQuery.type" placeholder="选择项目类型" clearable @change="handleSearchChange">
         <el-option label="所有" value="" />
         <el-option label="地灾治理和矿山生态修复类" value="地灾治理和矿山生态修复类" />
         <el-option label="地质勘察钻探类" value="地质勘察钻探类" />
         <el-option label="地质调查、测量测绘类" value="地质调查、测量测绘类" />
       </el-select>
-      <el-select v-model="searchQuery.status" placeholder="选择审核状态" clearable @change="updatePaginatedProjects">
+      <el-select v-model="searchQuery.status" placeholder="选择审核状态" clearable @change="handleSearchChange">
         <el-option label="所有" value="" />
         <el-option label="待审核" value="待审核" />
         <el-option label="已审核" value="已审核" />
+        <el-option label="未提交" value="未提交" />
       </el-select>
     </div>
-
-    <!-- 手动获取项目数据按钮 -->
-    <el-button type="success" @click="fetchProjects">获取项目数据</el-button>
 
     <!-- 表格 -->
     <el-table
@@ -41,7 +39,7 @@
         <template #default="{ row }">
           <el-button
             class="custom-button"
-            @click="viewProjectDetails(row)"
+            @click="fetchProjectDetails(row.id)"
             type="primary"
             size="small"
           >查看详情</el-button>
@@ -81,88 +79,72 @@ const searchQuery = ref({ name: '', type: '', status: '', completion: '' });
 const projectDetails = ref({});
 const isDialogVisible = ref(false);
 
-// 计算分页数据
-const updatePaginatedProjects = () => {
-  try {
-    const start = (currentPage.value - 1) * pageSize.value;
-    const end = currentPage.value * pageSize.value;
-
-    // 根据搜索条件过滤项目
-    const filteredProjects = paginatedProjects.value.filter(project => {
-      return (
-        (!searchQuery.value.name || project.projectName.includes(searchQuery.value.name)) &&
-        (!searchQuery.value.type || project.projectType === searchQuery.value.type) &&
-        (!searchQuery.value.status || project.status === searchQuery.value.status)
-      );
-    });
-
-    // 排序
-    filteredProjects.sort((a, b) => {
-      return (a[sortProp.value] < b[sortProp.value] ? -1 : 1) * (sortOrder.value === 'ascending' ? 1 : -1);
-    });
-
-    // 更新分页数据
-    paginatedProjects.value = filteredProjects.slice(start, end);
-    total.value = filteredProjects.length;
-  } catch (error) {
-    console.error("更新分页项目时出错:", error);
-  }
-};
-
 // 处理页码变更
 const handlePageChange = (page) => {
   currentPage.value = page;
-  updatePaginatedProjects();
+  fetchProjects();
 };
 
 // 处理排序变更
 const handleSortChange = ({ prop, order }) => {
   sortProp.value = prop;
   sortOrder.value = (order === 'ascending') ? 'ascending' : 'descending';
-  updatePaginatedProjects();
+  fetchProjects();
 };
 
-// 查看项目详情
-const viewProjectDetails = (project) => {
-  projectDetails.value = { ...project };
-  nextTick(() => {
-    isDialogVisible.value = true;
-  });
+// 获取项目详情
+const fetchProjectDetails = async (projectId) => {
+  try {
+    const response = await axios.get(`/projectApprovals/find/${projectId}`);
+    const data = response.data;
+    
+
+    if (data.code !== 1) {
+      throw new Error(data.msg || '获取项目详情失败');
+    }
+
+    projectDetails.value = data.data;
+    nextTick(() => {
+      isDialogVisible.value = true;
+    });
+  } catch (error) {
+    console.error('获取项目详情错误:', error);
+  }
 };
 
 async function fetchProjects() {
   try {
-    // Construct query parameters
     const params = {
-      creator: '', // Set this if needed
+      creator: '',
       projectName: searchQuery.value.name,
       projectType: searchQuery.value.type,
       status: searchQuery.value.status,
-      begin: '', // Set this if needed
-      end: '', // Set this if needed
-      page: 1, // Start from the first page
-      pageSize: 1000, // Set a large number to attempt fetching all data
+      begin: '',
+      end: '',
+      page: currentPage.value,
+      pageSize: pageSize.value,
     };
 
-    // Fetch data using axios
     const response = await axios.get('/projectMessages/finds', { params });
+
     const data = response.data;
-    console.log('data', data);
+   
     if (data.code !== 1) {
-      throw new Error(data.msg || 'Failed to fetch project data');
+      throw new Error(data.msg || '获取项目数据失败');
     }
 
-    // Update project list and pagination
     paginatedProjects.value = data.data.rows;
     total.value = data.data.total;
-    currentPage.value = 1; // Reset to first page if needed
-
-    // Recalculate paginated projects
-    updatePaginatedProjects();
   } catch (error) {
-    console.error('Error fetching project data:', error);
+    console.error('获取项目数据错误:', error);
   }
 }
+
+// 添加新的处理函数
+const handleSearchChange = () => {
+  currentPage.value = 1;
+  fetchProjects();
+};
 
 // 初始化
 onMounted(() => {

@@ -3,7 +3,7 @@
       <el-form-item label="施工工艺" required>
         <el-radio-group v-model="localForm.constructionType" @change="handleConstructionTypeChange" :disabled="true"> 
           <el-radio value="地灾治理和矿山生态修复类">地灾治理和矿山生态修复类</el-radio>
-          <el-radio value="地质勘查钻探类">地质勘查钻探类</el-radio>
+          <el-radio value="地质勘察钻探类">地质勘察钻探类</el-radio>
           <el-radio value="地质调查、测量测绘类">地质调查、测量测绘类</el-radio>
         </el-radio-group>
       </el-form-item>
@@ -18,7 +18,7 @@
         </el-col>
       </el-row>
 
-      <template v-if="localForm.constructionType === '地质勘查钻探类'">
+      <template v-if="localForm.constructionType === '地质勘察钻探类'">
         <el-form-item label="大型钻探设备">
           <el-select v-model="localForm.largeDrillingEquipment" placeholder="请选择" @change="emitUpdate">
             <el-option label="无大型钻探设备 (0分)" value="0"></el-option>
@@ -154,11 +154,12 @@
         default: '',
       },
     },
-    emits: ['updateData'],
+    emits: ['updateData', 'updateTotalScore'],
     setup(props, { emit }) {
       const localForm = ref(cloneDeep(props.initialData));
 
       const totalScore = computed(() => {
+        let score = 0;
         if (localForm.value.constructionType === '地灾治理和矿山生态修复类') {
           let mainScore = 0;
           let structureScore = 0;
@@ -188,14 +189,16 @@
           structureScore = Math.min(structureScore, 10);
           drainageScore = Math.min(drainageScore, 5); 
 
-          return mainScore + structureScore + drainageScore;
-        } else if (localForm.value.constructionType === '地质勘查钻探类') {
+          score = mainScore + structureScore + drainageScore;
+        } else if (localForm.value.constructionType === '地质勘察钻探类') {
           const baseScore = Number(localForm.value.largeDrillingEquipment || 0);
           const threatScore = (localForm.value.safetyThreats || []).length;
-          return Math.min(baseScore + threatScore, 30); // 最高分为 30 分
+          score = Math.min(baseScore + threatScore, 30); // 最高分为 30 分
         } else {
-          return 0; // 地质调查、测量测绘类
+          score = 0; // 地质调查、测量测绘类
         }
+        emit('updateTotalScore', score);
+        return score;
       });
 
       const emitUpdate = () => {
@@ -203,14 +206,18 @@
       };
 
       const handleConstructionTypeChange = () => {
-        console.log('Construction Type Changed:', localForm.value.constructionType); // 调试信息
+        // console.log('Construction Type Changed:', localForm.value.constructionType); // 调试信息
         if (localForm.value.constructionType === '地灾治理和矿山生态修复类') {
           if (!localForm.value.disasterItems || localForm.value.disasterItems.length === 0) {
             localForm.value.disasterItems = getDefaultDisasterItems();
           }
-        } else if (localForm.value.constructionType === '地质勘查钻探类') {
-          localForm.value.largeDrillingEquipment = '0';
-          localForm.value.safetyThreats = [];
+        } else if (localForm.value.constructionType === '地质勘察钻探类') {
+          if (!localForm.value.largeDrillingEquipment) {
+            localForm.value.largeDrillingEquipment = '0';
+          }
+          if (!localForm.value.safetyThreats) {
+            localForm.value.safetyThreats = [];
+          }
         }
         emitUpdate();
       };
@@ -224,7 +231,7 @@
       }, { deep: true, immediate: true });
 
       watch(() => props.projectType, (newProjectType) => {
-        console.log('newProjectType', newProjectType); // 调试信息
+        // console.log('newProjectType', newProjectType); // 调试信息
         if (newProjectType) {
           localForm.value.constructionType = newProjectType;
           handleConstructionTypeChange(); // 确保调用

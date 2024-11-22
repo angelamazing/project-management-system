@@ -3,106 +3,148 @@
     <el-card>
       <div class="header">
         <h2>系统日志</h2>
-        <el-form :inline="true" :model="filters" class="filter-form">
-          <el-form-item label="用户">
-            <el-input v-model="filters.user" placeholder="输入用户名"></el-input>
-          </el-form-item>
-          <el-form-item label="操作类型">
-            <el-select v-model="filters.action" placeholder="选择操作类型">
-              <el-option label="登录" value="登录"></el-option>
-              <el-option label="登出" value="登出"></el-option>
-              <el-option label="添加用户" value="添加用户"></el-option>
-              <el-option label="删除用户" value="删除用户"></el-option>
-              <el-option label="修改项目" value="修改项目"></el-option>
-              <!-- 其他操作类型 -->
-            </el-select>
-          </el-form-item>
-          <el-form-item label="时间">
+        <el-form :inline="true" :model="queryParams" class="filter-form">
+          <el-form-item label="时间范围">
             <el-date-picker
-              v-model="filters.date"
+              v-model="dateRange"
               type="daterange"
               range-separator="至"
               start-placeholder="开始日期"
-              end-placeholder="结束日期">
+              end-placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              @change="handleDateChange">
             </el-date-picker>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="filterLogs">筛选</el-button>
-            <el-button @click="resetFilters">重置</el-button>
+            <el-button type="primary" @click="fetchLogs">查询</el-button>
+            <el-button @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
 
-      <el-table :data="filteredLogs" style="width: 100%">
-        <el-table-column prop="timestamp" label="时间" width="180"></el-table-column>
-        <el-table-column prop="user" label="用户" width="150"></el-table-column>
-        <el-table-column prop="action" label="操作类型" width="150"></el-table-column>
-        <el-table-column prop="description" label="描述"></el-table-column>
+      <el-table :data="logsList" style="width: 100%" v-loading="loading">
+        <el-table-column prop="operateTime" label="操作时间" min-width="30%">
+          <template #default="{ row }">
+            {{ formatDateTime(row.operateTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="operateUsername" label="操作人" min-width="30%"></el-table-column>
+        <el-table-column prop="operateType" label="操作类型" min-width="30%"></el-table-column>
+
       </el-table>
+
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="queryParams.page"
+          v-model:page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange">
+        </el-pagination>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script>
+import { ref, reactive } from 'vue';
+import { ElMessage } from 'element-plus';
+import axios from '@/axios';
+
 export default {
   name: 'SystemLogs',
-  data() {
-    return {
-      logs: [
-        {
-          id: 1,
-          timestamp: '2024-08-30 10:30:00',
-          user: 'admin',
-          action: '登录',
-          description: '管理员登录系统',
-        },
-        {
-          id: 2,
-          timestamp: '2024-08-30 10:45:00',
-          user: 'user',
-          action: '修改项目',
-          description: '用户修改了项目A的信息',
-        },
-        {
-          id: 3,
-          timestamp: '2024-08-30 11:00:00',
-          user: 'admin',
-          action: '添加用户',
-          description: '管理员添加了用户B',
-        },
-        // 更多日志数据...
-      ],
-      filters: {
-        user: '',
-        action: '',
-        date: null,
-      },
-      filteredLogs: []
+  setup() {
+    const loading = ref(false);
+    const logsList = ref([]);
+    const total = ref(0);
+    const dateRange = ref(null);
+
+    const queryParams = reactive({
+      begin: '',
+      end: '',
+      page: 1,
+      pageSize: 10
+    });
+
+    const fetchLogs = async () => {
+      loading.value = true;
+      try {
+        const response = await axios.get('/operateLogs/finds', {
+          params: queryParams
+        });
+        
+        if (response.data.code === 1) {
+          logsList.value = response.data.data.rows;
+          total.value = response.data.data.total;
+        } else {
+          ElMessage.error(response.data.msg || '获取日志列表失败');
+        }
+      } catch (error) {
+        console.error('获取日志列表出错:', error);
+        ElMessage.error('获取日志列表失败');
+      } finally {
+        loading.value = false;
+      }
     };
-  },
-  created() {
-    this.filteredLogs = this.logs; // 默认显示所有日志
-  },
-  methods: {
-    filterLogs() {
-      this.filteredLogs = this.logs.filter(log => {
-        const matchesUser = this.filters.user === '' || log.user.includes(this.filters.user);
-        const matchesAction = this.filters.action === '' || log.action === this.filters.action;
-        const matchesDate = !this.filters.date || (
-          new Date(log.timestamp) >= new Date(this.filters.date[0]) &&
-          new Date(log.timestamp) <= new Date(this.filters.date[1])
-        );
-        return matchesUser && matchesAction && matchesDate;
+
+    const handleDateChange = (val) => {
+      if (val) {
+        queryParams.begin = val[0];
+        queryParams.end = val[1];
+      } else {
+        queryParams.begin = '';
+        queryParams.end = '';
+      }
+    };
+
+    const resetQuery = () => {
+      dateRange.value = null;
+      queryParams.begin = '';
+      queryParams.end = '';
+      queryParams.page = 1;
+      fetchLogs();
+    };
+
+    const handleSizeChange = (val) => {
+      queryParams.pageSize = val;
+      fetchLogs();
+    };
+
+    const handleCurrentChange = (val) => {
+      queryParams.page = val;
+      fetchLogs();
+    };
+
+    const formatDateTime = (dateTimeStr) => {
+      if (!dateTimeStr) return '';
+      return new Date(dateTimeStr).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
       });
-    },
-    resetFilters() {
-      this.filters = {
-        user: '',
-        action: '',
-        date: null,
-      };
-      this.filteredLogs = this.logs;
-    }
+    };
+
+    // 初始加载
+    fetchLogs();
+
+    return {
+      loading,
+      logsList,
+      total,
+      dateRange,
+      queryParams,
+      fetchLogs,
+      handleDateChange,
+      resetQuery,
+      handleSizeChange,
+      handleCurrentChange,
+      formatDateTime
+    };
   }
 };
 </script>
@@ -121,12 +163,12 @@ export default {
 
 .filter-form {
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
-.filter-form .el-form-item {
-  margin-right: 20px;
-  margin-bottom: 10px;
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
