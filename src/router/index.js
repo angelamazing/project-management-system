@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-22 14:54:44
+ * @LastEditTime: 2024-11-27 11:45:58
  * @FilePath: \project-management-system\src\router\index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -26,7 +26,7 @@ const routes = [
       { 
         path: 'projects', 
         component: ProjectList,
-        meta: { requiredRoles: ['普通用户', '安全员', '管理员'], requiresAuth: true }
+        meta: { requiredRoles: ['普通用户', '安全员', '管理员','队领导'], requiresAuth: true }
       },
       { 
         path: 'new-project', 
@@ -46,12 +46,12 @@ const routes = [
       { 
         path: 'overview', 
         component: ProjectOverview,
-        meta: { requiredRoles: ['普通用户', '安全员', '管理员'], requiresAuth: true }
+        meta: { requiredRoles: ['普通用户', '安全员', '管理员','队领导'], requiresAuth: true }
       },
       { 
         path: 'review', 
         component: ReviewProjects,
-        meta: { requiredRoles: ['安全员', '管理员'], requiresAuth: true }
+        meta: { requiredRoles: ['安全员', '管理员','队领导'], requiresAuth: true }
       },
     ]
   },
@@ -64,7 +64,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   // console.log('路由守卫检查权限');
-  // console.log('当前用户状态:', store.state.user);
+  console.log('当前用户状态:', store.state.user);
   // console.log('目标路由:', to.path);
 
   const isAuthenticated = store.getters.isAuthenticated;

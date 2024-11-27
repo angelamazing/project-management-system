@@ -2,7 +2,7 @@
  * @Author: Jerry Han angelamazing@163.com
  * @Date: 2024-10-27 17:29:30
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-22 14:50:51
+ * @LastEditTime: 2024-11-27 10:42:16
  * @FilePath: \project-management-system\src\composables\useUnsubmittedProjects.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -19,18 +19,21 @@ export function useUnsubmittedProjects() {
   const store = useStore();
   // 设置查询状态creator,status
   const username = computed(() => store.getters.username);
-  const status = "未提交" 
-
+  const status = "未提交" ;
+  
   const fetchProjects = async () => {
     try {
       const response = await axios.get(`/projectMessages/finds?creator=${encodeURIComponent(username.value)}&status=${encodeURIComponent(status)} `
         );
+      console.log(response.data)
       const result = response.data; // 直接获取响应数据      
       const rows = result.data.rows;
       const updatedRows = rows.map(row => {
         // 确保 internalConditions 存在并且是字符串
         if (typeof row.internalConditions === 'string') {
           row.internalConditions = row.internalConditions.split('，'); // 使用中文逗号分隔
+          
+
         }
         return row;
       });

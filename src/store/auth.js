@@ -2,7 +2,7 @@
  * @Author: Your Name
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-22 11:38:56
+ * @LastEditTime: 2024-11-27 08:52:11
  * @FilePath: \project-management-system\src\store\auth.js
  * @Description: Vuex store for user authentication and authorization management
  */
@@ -15,6 +15,7 @@ export default createStore({
     user: JSON.parse(localStorage.getItem('user')) || null,
     role: null,
     permissions: [],
+    
   },
   mutations: {
     setUser(state, user) {
@@ -22,7 +23,9 @@ export default createStore({
       state.user = user;
       state.role = user.role;
       state.permissions = user.permissions;
-      state.id = user.id
+      state.id = user.id;
+      state.departmentId = user.departmentId;
+      
 
       // 将用户信息存储到 localStorage
       localStorage.setItem('user', JSON.stringify(user));
@@ -53,6 +56,7 @@ export default createStore({
           role: userData.role,
           token: userData.token,
           id:userData.id,
+          departmentId:userData.departmentId,
         };
         
         // 提交 mutation 更新状态
@@ -79,5 +83,6 @@ export default createStore({
     userRole: state => state.user ? state.user.role : null,
     userPermissions: state => state.user ? state.user.permissions : [],
     userId: state => state.user ? state.user.id : null,
+    departmentId: state => state.user ? state.user.departmentId : null,
   }
 });
