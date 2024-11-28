@@ -330,8 +330,8 @@ export default defineComponent({
       // 生成文件名（包含日期时间）
       const fileName = `项目列表_${new Date().toLocaleDateString()}.xlsx`;
       XLSX.writeFile(wb, fileName);
-    },
-
+    },    
+    
     // 导出到CSV
     exportToCSV() {
       const data = this.formatExportData();
@@ -427,7 +427,7 @@ export default defineComponent({
 }
 
 .el-tag {
-  width: 65px;
+  width: 90px;
   text-align: center;
 }
 

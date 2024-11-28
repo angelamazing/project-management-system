@@ -229,6 +229,12 @@ export default {
       return this.$route.path === '/dashboard';
     }
   },
+  mounted() {
+    // 如果是根路径，重定向到 project-overview
+    if (this.$route.path === '/dashboard') {
+      this.$router.push('/dashboard/overview');
+    }
+  },
   methods: {
     logout() {
       try {

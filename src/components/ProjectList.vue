@@ -97,7 +97,7 @@ const fetchProjectDetails = async (projectId) => {
   try {
     const response = await axios.get(`/projectApprovals/find/${projectId}`);
     const data = response.data;
-    
+    console.log(data) 
 
     if (data.code !== 1) {
       throw new Error(data.msg || '获取项目详情失败');

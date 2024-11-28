@@ -47,7 +47,7 @@
 
   const safetyThreatOptions = [
     { label: '地上/地下管线安全距离不符合要求 (1分)' },
-    { label: '作业区域存在滑坡、崩塌、滚石、洪水、危房等安全威胁 (1分)' },
+    { label: '作业区域存在滑坡、崩塌、滚石、洪水、危���等安全威胁 (1分)' },
     { label: '未按规定设置围挡和安全警示标志标牌 (1分)' },
     { label: '作业区域坑洞、临边等未采取安全防护措施 (1分)' },
     { label: '水上、铁路、公路等特殊地区未采取必要的施工安全防护措施 (1分)' },
@@ -206,26 +206,29 @@
       };
 
       const handleConstructionTypeChange = () => {
-        // console.log('Construction Type Changed:', localForm.value.constructionType); // 调试信息
-        if (localForm.value.constructionType === '地灾治理和矿山生态修复类') {
-          if (!localForm.value.disasterItems || localForm.value.disasterItems.length === 0) {
-            localForm.value.disasterItems = getDefaultDisasterItems();
-          }
-        } else if (localForm.value.constructionType === '地质勘察钻探类') {
-          if (!localForm.value.largeDrillingEquipment) {
-            localForm.value.largeDrillingEquipment = '0';
-          }
-          if (!localForm.value.safetyThreats) {
-            localForm.value.safetyThreats = [];
-          }
+        // 清空所有相关字段
+        const cleanForm = {
+          constructionType: localForm.value.constructionType
+        };
+
+        // 根据选择的类型添加对应的初始化字段
+        if (cleanForm.constructionType === '地灾治理和矿山生态修复类') {
+          cleanForm.disasterItems = getDefaultDisasterItems();
+        } else if (cleanForm.constructionType === '地质勘察钻探类') {
+          cleanForm.largeDrillingEquipment = '0';
+          cleanForm.safetyThreats = [];
         }
+
+        // 更新表单数据
+        localForm.value = cleanForm;
         emitUpdate();
       };
 
       watch(() => props.initialData, (newValue) => {
         if (newValue && Object.keys(newValue).length > 0) {
           localForm.value = cloneDeep(newValue);
-        } else {
+        } else {3
+          
           localForm.value = { constructionType: '' };
         }
       }, { deep: true, immediate: true });

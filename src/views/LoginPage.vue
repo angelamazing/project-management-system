@@ -2,7 +2,7 @@
  * @Author: Jerry Han angelamazing@163.com
  * @Date: 2024-10-22 15:44:18
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-27 09:11:48
+ * @LastEditTime: 2024-11-28 09:57:53
  * @FilePath: \project-management-system\src\views\LoginPage.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -89,9 +89,9 @@ export default {
                 if (result.success) {
                   // console.log('Vuex 登录成功，准备跳转');
                   await this.$router.push('/dashboard');  
-                  console.log(response.data)
+                  // console.log(response.data)
                  
-                  console.log(`当前登录用户部门ID: ${this.$store.state.departmentId}`);
+                  // console.log(`当前登录用户部门ID: ${this.$store.state.departmentId}`);
                 } else {
                   this.errorMessage = result.message || '登录失败';
                 }
@@ -134,7 +134,10 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f0f4f8;
+  background-image: url('@/assets/backgroun1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .login-card {

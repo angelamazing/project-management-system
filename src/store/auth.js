@@ -60,7 +60,7 @@ export default createStore({
         };
         
         // 提交 mutation 更新状态
-        commit('setUser', user);
+        commit('setUser', user);  
         
         // 存储 token
         localStorage.setItem('token', userData.token);

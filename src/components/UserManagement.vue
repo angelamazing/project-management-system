@@ -9,7 +9,13 @@
       <el-table :data="users" style="width: 100%">
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="permission" label="角色"></el-table-column>
-          
+        <el-table-column prop="departmentName" label="部门"></el-table-column>
+        <el-table-column prop="gender" label="性别">
+          <template #default="scope">
+            {{ scope.row.gender === 1 ? '男' : '女' }}
+          </template>
+        </el-table-column>
+        
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <el-button @click="editUser(scope.row)" size="small">编辑</el-button>
@@ -44,6 +50,16 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="部门">
+          <el-select v-model="editForm.departmentId">
+            <el-option
+              v-for="dept in departments"
+              :key="dept.id"
+              :label="dept.name"
+              :value="dept.id"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -74,10 +90,20 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="部门" prop="departmentId">
+          <el-select v-model="addForm.departmentId" placeholder="请选择部门" style="width: 100%">
+            <el-option
+              v-for="dept in departments"
+              :key="dept.id"
+              :label="dept.name"
+              :value="dept.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="性别" prop="gender">
           <el-radio-group v-model="addForm.gender">
-            <el-radio :label="1">男</el-radio>
-            <el-radio :label="2">女</el-radio>
+            <el-radio :value="1">男</el-radio>
+            <el-radio :value="2">女</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -92,7 +118,7 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import axios from '@/axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { mapGetters } from 'vuex';
@@ -106,7 +132,9 @@ export default {
     const editForm = reactive({
       id: '',
       username: '',
-      permission: ''
+      permission: '',
+      departmentId: '',
+      gender: 1
     })
 
     const addDialogVisible = ref(false)
@@ -114,6 +142,7 @@ export default {
     const addForm = reactive({
       username: '',
       permission: '',
+      departmentId: '',
       gender: 1
     })
     
@@ -124,6 +153,9 @@ export default {
       permission: [
         { required: true, message: '请选择角色', trigger: 'change' }
       ],
+      departmentId: [
+        { required: true, message: '请选择部门', trigger: 'change' }
+      ],
       gender: [
         { required: true, message: '请选择性别', trigger: 'change' }
       ]
@@ -132,18 +164,37 @@ export default {
     // 角色选项
     const permissionOptions = [
       { label: '普通用户', value: '普通用户' },
-      { label: '安全员', value: '安全员' },
-      { label: '管理员', value: '管理员' }
+      { label: '部门安全员', value: '部门安全员' },
+      { label: '部门安全主管', value: '部门安全主管' },
+      { label: '安全主管', value: '安全主管' },
+      { label: '队领导', value: '队领导' },
+      { label: '管理员', value: '管理员' },
     ]
+
+    const departments = ref([])
+
+    // 获取部门列表
+    const fetchDepartments = async () => {
+      try {
+        const response = await axios.get('/departments/finds')
+        if (response.data.code === 1) {
+          departments.value = response.data.data
+          console.log(departments.value)
+        }
+      } catch (error) {
+        ElMessage.error('获取部门列表失败')
+      }
+    }
 
     // 获取用户列表
     const fetchUsers = async () => {
       try {
         const response = await axios.get('/users/finds')
         if (response.data.code === 1) {
-          users.value = response.data.data.rows
-        } else {
-          ElMessage.error(response.data.msg)
+          users.value = response.data.data.rows.map(user => ({
+            ...user,
+            departmentName: departments.value.find(d => d.id === user.departmentId)?.name
+          }))
         }
       } catch (error) {
         ElMessage.error('获取用户列表失败')
@@ -163,7 +214,8 @@ export default {
       try {
         const response = await axios.put('/users/update', {
           id: editForm.id,
-          permission: editForm.permission
+          permission: editForm.permission,
+          departmentId: editForm.departmentId
         })
         
         if (response.data.code === 1) {
@@ -196,6 +248,12 @@ export default {
         } catch (error) {
           ElMessage.error('删除失败')
         }
+      }).catch(() => {
+        // 添加catch块来处理取消操作
+        ElMessage({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
     }
 
@@ -229,8 +287,10 @@ export default {
       })
     }
 
-    // 初始化
-    fetchUsers()
+    onMounted(() => {
+      fetchDepartments()
+      fetchUsers()
+    })
 
     return {
       users,
@@ -245,7 +305,9 @@ export default {
       addForm,
       rules,
       openAddUserDialog,
-      handleAdd
+      handleAdd,
+      departments,
+      fetchDepartments
     }
   },
   computed: {

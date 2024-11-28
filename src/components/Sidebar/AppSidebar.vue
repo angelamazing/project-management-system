@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-27 11:53:06
+ * @LastEditTime: 2024-11-28 09:54:27
  * @FilePath: \project-management-system\src\components\Sidebar\AppSidebar.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -12,7 +12,7 @@
     <el-menu-item index="2" v-if="hasRole(['普通用户',  '管理员',])">新建项目</el-menu-item>
     <el-menu-item index="3" v-if="hasRole(['普通用户', '安全员', '管理员','队领导'])">查看项目</el-menu-item>
     <el-menu-item index="7" v-if="hasRole(['安全员', '管理员',])">审核项目</el-menu-item>
-    <el-menu-item index="4" v-if="hasRole(['普通用户','安全员', '管理员','队领导'])">项目总览</el-menu-item>
+    <!-- <el-menu-item index="4" v-if="hasRole(['普通用户','安全员', '管理员','队领导'])">项目总览</el-menu-item> -->
     <el-menu-item index="5" v-if="hasRole(['管理员'])">用户管理</el-menu-item>
     <el-menu-item index="6" v-if="hasRole(['管理员'])">系统日志</el-menu-item>
   </el-menu>
@@ -30,7 +30,7 @@ export default {
     handleSelect(index) {
       switch (index) {
         case '1':
-          this.$router.push('/dashboard');
+          this.$router.push('/dashboard/overview');
           break;
         case '2':
           this.$router.push('/dashboard/new-project');
@@ -38,9 +38,9 @@ export default {
         case '3':
           this.$router.push('/dashboard/projects');
           break;
-        case '4':
-          this.$router.push('/dashboard/overview');
-          break;
+        // case '4':
+          // this.$router.push('/dashboard/overview');
+          // break;
         case '5':
           this.$router.push('/dashboard/users');
           break;
