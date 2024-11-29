@@ -234,7 +234,7 @@ export default defineComponent({
         },
         xAxis: {
           type: 'category',
-          data: [ '未提交','待审核', '已审核'],
+          data: [ '未提交','待审核', '部门安全员已审核','部门安全主管已审核','安全主管已审核'],
         },
         yAxis: {
           type: 'value',
@@ -246,7 +246,9 @@ export default defineComponent({
             data: [
               this.projectStatusCounts['未提交'] || 0,
               this.projectStatusCounts['待审核'] || 0,
-              this.projectStatusCounts['已审核'] || 0
+              this.projectStatusCounts['部门安全员已审核'] || 0,
+              this.projectStatusCounts['部门安全主管已审核'] || 0,
+              this.projectStatusCounts['安全主管已审核'] || 0
             ],
             itemStyle: {
               color: '#5470C6',

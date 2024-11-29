@@ -282,36 +282,46 @@ const handleSave = () => {
     }
 };
 const handleSubmit = async () => {
-  if (isProjectComplete()) {
-    try {
-      const scores = calculateProjectScore();
-      projectForm.value.partialScore = scores.partialScores.join('，');
-      projectForm.value.totalScore = scores.totalScore.toString();
-      // 将项目状态设置为 '待审核'
-      if (currentAction.value === 'create') {
-        projectForm.value.status = '待审核';
-        if (Array.isArray(projectForm.value.internalConditions)) {
-          projectForm.value.internalConditions = projectForm.value.internalConditions.join(',');
-        }
-
-        addProject({ ...projectForm.value,creator:username.value})
-      } 
-      else {
-        projectForm.value.status = '待审核';
-        updateProject(projectForm.value);
-
-      }
-      showDialog.value = false;
-      resetForm();
-      ElMessage.success('项目已成功提交审核');
-    
-    } catch (error) {
-      console.error('提交项目时出错:', error);
-      ElMessage.error('提交项目时出错: ' + error.message);
+  // 添加确认提示框
+  ElMessageBox.confirm(
+    '您确定要提交审核吗？请确保所有信息无误。',
+    '确认提交',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
     }
-  } else {
-    ElMessage.warning('请填写所有必填信息后再提交审核');
-  }
+  ).then(async () => {
+    if (isProjectComplete()) {
+      try {
+        const scores = calculateProjectScore();
+        projectForm.value.partialScore = scores.partialScores.join('，');
+        projectForm.value.totalScore = scores.totalScore.toString();
+        // 将项目状态设置为 '待审核'
+        if (currentAction.value === 'create') {
+          projectForm.value.status = '待审核';
+          if (Array.isArray(projectForm.value.internalConditions)) {
+            projectForm.value.internalConditions = projectForm.value.internalConditions.join(',');
+          }
+
+          addProject({ ...projectForm.value, creator: username.value })
+        } else {
+          projectForm.value.status = '待审核';
+          updateProject(projectForm.value);
+        }
+        showDialog.value = false;
+        resetForm();
+        ElMessage.success('项目已成功提交审核');
+      } catch (error) {
+        console.error('提交项目时出错:', error);
+        ElMessage.error('提交项目时出错: ' + error.message);
+      }
+    } else {
+      ElMessage.warning('请填写所有必填信息后再提交审核');
+    }
+  }).catch(() => {
+    ElMessage.info('已取消提交审核');
+  });
 };
 
 const constructionProcessScore = ref(0);

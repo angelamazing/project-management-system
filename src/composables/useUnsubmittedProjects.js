@@ -2,7 +2,7 @@
  * @Author: Jerry Han angelamazing@163.com
  * @Date: 2024-10-27 17:29:30
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-27 10:42:16
+ * @LastEditTime: 2024-11-29 20:33:18
  * @FilePath: \project-management-system\src\composables\useUnsubmittedProjects.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -46,27 +46,45 @@ export function useUnsubmittedProjects() {
 
   const addProject = async (project) => {
     try {
-      // Ensure internalConditions is a string before sending
-      // console.log(JSON.stringify(project.internalConditions, null, 2));
       if (Array.isArray(project.internalConditions)) {
         project.internalConditions = project.internalConditions.join(',');
       } 
       
       const response = await axios.post('/projectMessages/add', project);
+      console.log('response.data', response.data);
 
-      // Split back to array after adding
-      project.internalConditions = project.internalConditions.split(',');
-      project.id = response.data.data;
-      
-      // Push the project to unsubmittedProjects
-      if(project.status === '未提交'){
-        unsubmittedProjects.value.push(project);
+      // 检查返回码
+      if (response.data.code === 1) {
+        // 成功情况下的处理
+        project.internalConditions = project.internalConditions.split(',');
+        project.id = response.data.data;
+        
+        if(project.status === '未提交'){
+          unsubmittedProjects.value.push(project);
+        }
+        return {
+          success: true,
+          message: '添加成功'
+        };
+      } else {
+        // 处理特定的错误情况
+        const errorMessage = response.data.msg === 'NOT_PERMISSION' 
+          ? '您没有权限执行此操作'
+          : response.data.msg || '添加项目失败';
+          
+        console.error('添加项目失败:', errorMessage);
+        return {
+          success: false,
+          message: errorMessage
+        };
       }
-      // console.log('response.data', response.data);
-      // console.log('Current unsubmittedProjects:', unsubmittedProjects.value);
 
     } catch (error) {
       console.error('Failed to add project:', error);
+      return {
+        success: false,
+        message: '添加项目时发生错误'
+      };
     }
   };
 

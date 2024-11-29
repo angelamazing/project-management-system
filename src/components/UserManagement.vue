@@ -10,12 +10,6 @@
         <el-table-column prop="username" label="用户名"></el-table-column>
         <el-table-column prop="permission" label="角色"></el-table-column>
         <el-table-column prop="departmentName" label="部门"></el-table-column>
-        <el-table-column prop="gender" label="性别">
-          <template #default="scope">
-            {{ scope.row.gender === 1 ? '男' : '女' }}
-          </template>
-        </el-table-column>
-        
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <el-button @click="editUser(scope.row)" size="small">编辑</el-button>
@@ -36,21 +30,7 @@
         <el-form-item label="用户名">
           <span>{{ editForm.username }}</span>
         </el-form-item>
-        <el-form-item label="角色">
-          <el-select 
-            v-model="editForm.permission"
-            placeholder="请选择角色"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="item in permissionOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="部门">
+      <el-form-item label="部门">
           <el-select v-model="editForm.departmentId">
             <el-option
               v-for="dept in departments"
@@ -60,6 +40,23 @@
             />
           </el-select>
         </el-form-item>
+
+        <el-form-item label="角色">
+          <el-select 
+            v-model="editForm.permission"
+            placeholder="请先选择部门"
+            :disabled="!editForm.departmentId"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in currentPermissionOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -80,18 +77,13 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addForm.username" placeholder="请输入用户名"></el-input>
         </el-form-item>
-        <el-form-item label="角色" prop="permission">
-          <el-select v-model="addForm.permission" placeholder="请选择角色" style="width: 100%">
-            <el-option
-              v-for="item in permissionOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="部门" prop="departmentId">
-          <el-select v-model="addForm.departmentId" placeholder="请选择部门" style="width: 100%">
+          <el-select 
+            v-model="addForm.departmentId" 
+            @change="handleDepartmentChange"
+            placeholder="请选择部门" 
+            style="width: 100%"
+          >
             <el-option
               v-for="dept in departments"
               :key="dept.id"
@@ -100,6 +92,23 @@
             />
           </el-select>
         </el-form-item>
+
+        <el-form-item label="角色" prop="permission">
+          <el-select 
+            v-model="addForm.permission" 
+            placeholder="请先选择部门" 
+            :disabled="!addForm.departmentId"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in currentPermissionOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        
         <el-form-item label="性别" prop="gender">
           <el-radio-group v-model="addForm.gender">
             <el-radio :value="1">男</el-radio>
@@ -118,7 +127,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import axios from '@/axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { mapGetters } from 'vuex';
@@ -161,16 +170,6 @@ export default {
       ]
     }
 
-    // 角色选项
-    const permissionOptions = [
-      { label: '普通用户', value: '普通用户' },
-      { label: '部门安全员', value: '部门安全员' },
-      { label: '部门安全主管', value: '部门安全主管' },
-      { label: '安全主管', value: '安全主管' },
-      { label: '队领导', value: '队领导' },
-      { label: '管理员', value: '管理员' },
-    ]
-
     const departments = ref([])
 
     // 获取部门列表
@@ -188,6 +187,7 @@ export default {
 
     // 获取用户列表
     const fetchUsers = async () => {
+      
       try {
         const response = await axios.get('/users/finds')
         if (response.data.code === 1) {
@@ -205,7 +205,10 @@ export default {
     const editUser = (row) => {
       editForm.id = row.id
       editForm.username = row.username
-      editForm.permission = row.permission
+      editForm.permission = ''
+      editForm.departmentId = ''
+      editForm.gender = 1
+      
       dialogVisible.value = true
     }
 
@@ -287,6 +290,54 @@ export default {
       })
     }
 
+    // 根据部门ID获取可选角色
+    const getPermissionsByDepartment = (departmentId) => {
+      const department = departments.value.find(d => d.id === departmentId)
+      if (!department) return []
+      
+      // 特殊部门的角色限制
+      switch (department.name) {
+        case '安全科':
+          return [{ label: '安全主管', value: '安全主管' }]
+        case '队领导':
+          return [{ label: '队领导', value: '队领导' }]
+        case '管理员':
+          return [{ label: '管理员', value: '管理员' }]
+        default:
+          // 其他部门可以选择除了上述三个角色之外的角色
+          return [
+            { label: '普通用户', value: '普通用户' },
+            { label: '部门安全员', value: '部门安全员' },
+            { label: '部门安全主管', value: '部门安全主管' }
+          ]
+      }
+    }
+
+    // 统一处理部门变化
+    const handleDepartmentChange = (departmentId) => {
+      console.log('部门变化:', departmentId)
+      const currentForm = addDialogVisible.value ? addForm : editForm
+      currentForm.permission = ''
+      
+      // 打印当前部门和可选角色，用于调试
+      const department = departments.value.find(d => d.id === departmentId)
+      console.log('当前选择的部门:', department)
+      console.log('可选角色:', getPermissionsByDepartment(departmentId))
+    }
+
+    // 计算属性：当前可选的角色列表
+    const currentPermissionOptions = computed(() => {
+      const currentForm = addDialogVisible.value ? addForm : editForm
+      const departmentId = currentForm.departmentId
+      console.log('计算属性 - 当前部门ID:', departmentId)
+      console.log('计算属性 - 是否为添加对话框:', addDialogVisible.value)
+      
+      if (!departmentId) return []
+      const options = getPermissionsByDepartment(departmentId)
+      console.log('计算属性 - 当前可选角色:', options)
+      return options
+    })
+
     onMounted(() => {
       fetchDepartments()
       fetchUsers()
@@ -296,7 +347,6 @@ export default {
       users,
       dialogVisible,
       editForm,
-      permissionOptions,
       editUser,
       handleUpdate,
       deleteUser,
@@ -307,7 +357,9 @@ export default {
       openAddUserDialog,
       handleAdd,
       departments,
-      fetchDepartments
+      fetchDepartments,
+      currentPermissionOptions,
+      handleDepartmentChange
     }
   },
   computed: {

@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-10-04 16:06:48
  * @LastEditors: Jerry House angelamazing@163.com
- * @LastEditTime: 2024-11-22 16:46:33
+ * @LastEditTime: 2024-11-29 20:21:12
  * @FilePath: \project-management-system\src\components\ReviewProjects.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE%E8%AE%BE%E8%AE%BE
 -->
@@ -26,63 +26,89 @@
       width="80%"
     >
       <div class="dialog-content">
-        <div class="project-details">
-          <h3>项目基础信息</h3>
-          <p><strong>项目名称:</strong> {{ currentProject.projectName }}</p>
-          <p><strong>创建人:</strong> {{ currentProject.creator }}</p>
-          <p><strong>状态:</strong> {{ currentProject.status }}</p>
-          <p><strong>项目类型:</strong> {{ currentProject.projectType }}</p>
-          <p><strong>项目规模:</strong> {{ currentProject.projectScale }}</p>
-          <p><strong>周边环境:</strong> {{ currentProject.surroundingRisks }}</p>
-          <p><strong>内部环境:</strong> {{ currentProject.internalConditions }}</p>
-          <p><strong>其他说明:</strong> {{ currentProject.customSurroundingRisks }}</p>
+        <div class="left-column">
+          <!-- 基本信息 -->
+          <section>
+            <h3>基本信息</h3>
+            <p><strong>项目名称:</strong> {{ currentProject.projectName }}</p>
+            <p><strong>创建人:</strong> {{ currentProject.creator }}</p>
+            <p><strong>状态:</strong> {{ currentProject.status }}</p>
+            <p><strong>项目类型:</strong> {{ currentProject.projectType }}</p>
+            <p><strong>项目规模:</strong> {{ currentProject.projectScale }}</p>
+            <p><strong>周边环境:</strong> {{ currentProject.surroundingRisks }}</p>
+            <p><strong>内部环境:</strong> {{ currentProject.internalConditions }}</p>
+            <p><strong>其他说明:</strong> {{ currentProject.customSurroundingRisks }}</p>
+          </section>
 
-          <h3>施工工艺</h3>
-          <ul>
-            <li v-for="item in formattedConstructionProcess" :key="item.label">
-              <strong>{{ item.label }}:</strong> {{ item.selectedLabel }}
-            </li>
-          </ul>
+          <!-- 施工信息 -->
+          <section>
+            <h3>施工工艺</h3>
+            <ul>
+              <li v-for="item in formattedConstructionProcess" :key="item.label">
+                <strong>{{ item.label }}:</strong> {{ item.selectedLabel }}
+              </li>
+            </ul>
+          </section>
 
-          <h3>团队管理信息</h3>
-          <p><strong>管理经验:</strong> {{ currentProject.managementExperience }}</p>
-          <p><strong>专业构:</strong> {{ currentProject.professionalStructure }}</p>
-          <p><strong>学历层次:</strong> {{ currentProject.educationLevel }}</p>
+          <!-- 管理信息 -->
+          <section>
+            <h3>团队管理信息</h3>
+            <p><strong>管理经验:</strong> {{ currentProject.managementExperience }}</p>
+            <p><strong>专业结构:</strong> {{ currentProject.professionalStructure }}</p>
+            <p><strong>学历层次:</strong> {{ currentProject.educationLevel }}</p>
+          </section>
 
-          <h3>分包队伍信息</h3>
-          <p><strong>队伍平均年龄:</strong> {{ currentProject.subcontractAvgAge }}</p>
-          <p><strong>队伍经验:</strong> {{ currentProject.subcontractExperience }}</p>
-          <p><strong>队伍学历:</strong> {{ currentProject.subcontractEducation }}</p>
+          <!-- 队伍信息 -->
+          <section>
+            <h3>分包队伍信息</h3>
+            <p><strong>队伍平均年龄:</strong> {{ currentProject.subcontractAvgAge }}</p>
+            <p><strong>队伍经验:</strong> {{ currentProject.subcontractExperience }}</p>
+            <p><strong>队伍学历:</strong> {{ currentProject.subcontractEducation }}</p>
+          </section>
         </div>
 
-        <div class="review-section">
-          <div class="review-scores">
-            <el-divider>初始得分信息</el-divider>
-            <h4>项目基础信息得分: {{ partialScores[0] }}</h4>
-            <h4>施工工艺得分: {{ partialScores[1] }}</h4>
-            <h4>团队管理信息得分: {{ partialScores[2] }}</h4>
-            <h4>分包队伍信息得分: {{ partialScores[3] }}</h4>
-          </div>
+        <div class="right-column">
+          <div class="review-section">
+            <section class="approval-section">
+              <h3>审批信息</h3>
+              <div v-for="(part, index) in currentProject.projectApprovalParts" 
+                   :key="index" 
+                   class="approval-part">
+                <h4>{{ part.departmentName || '初始' }}</h4>
+                <p><strong>审核人:</strong> {{ part.reviewer || '无' }}</p>
+                <p><strong>各部分评审意见:</strong> {{ formatReviewComments(part.reviewComments) || '无' }}</p>
+                <p><strong>各部分得分:</strong> {{ part.partialScore || '未评分' }}
+                  <span v-if="part.partialScore">(总分: {{ calculatePartTotal(part.partialScore) }})</span>
+                </p>
+                <p v-if="part.partialReviewComments"><strong>补充意见:</strong> {{ part.partialReviewComments }}</p>
+              </div>
+              <div class="total-score">
+                <p><strong>{{ lastReviewer }}审核总分:</strong> {{ finalScore }}</p>
+                <p><strong>风险等级:</strong> {{ finalRiskLevel }}</p>
+              </div>
+            </section>
 
-          <div class="review-inputs">
-            <el-divider>审核信息</el-divider>
-            <el-form>
-              <el-form-item label="项目基础信息得分" class="review-form-item">
-                <el-input-number v-model="adjustedScores.constructionTechnique" :min="0" :max="100" :step="1"></el-input-number>
-              </el-form-item>
-              <el-form-item label="施工工艺得分" class="review-form-item">
-                <el-input-number v-model="adjustedScores.projectManagement" :min="0" :max="100" :step="1"></el-input-number>
-              </el-form-item>
-              <el-form-item label="团队管理信息得分" class="review-form-item">
-                <el-input-number v-model="adjustedScores.safetyMeasures" :min="0" :max="100" :step="1"></el-input-number>
-              </el-form-item>
-              <el-form-item label="分包队伍信息得分" class="review-form-item">
-                <el-input-number v-model="adjustedScores.subcontractTeam" :min="0" :max="100" :step="1"></el-input-number>
-              </el-form-item>
-              <el-form-item label="评审意见" class="review-form-item">
-                <el-input v-model="reviewComment" type="textarea"></el-input>
-              </el-form-item>
-            </el-form>
+            <div class="review-inputs">
+              <el-divider>审核信息</el-divider>
+              <el-form>
+                <el-form-item label="项目基础信息得分" class="review-form-item">
+                  <el-input-number v-model="adjustedScores.constructionTechnique" :min="0" :max="100" :step="1"></el-input-number>
+                  <el-input v-model="reviewComments.basicInfo" placeholder="该部分评审意见" style="margin-top: 10px;"></el-input>
+                </el-form-item>
+                <el-form-item label="施工工艺得分" class="review-form-item">
+                  <el-input-number v-model="adjustedScores.projectManagement" :min="0" :max="100" :step="1"></el-input-number>
+                  <el-input v-model="reviewComments.constructionTechnique" placeholder="该部分评审意见" style="margin-top: 10px;"></el-input>
+                </el-form-item>
+                <el-form-item label="团队管理信息得分" class="review-form-item">
+                  <el-input-number v-model="adjustedScores.safetyMeasures" :min="0" :max="100" :step="1"></el-input-number>
+                  <el-input v-model="reviewComments.management" placeholder="该部分评审意见" style="margin-top: 10px;"></el-input>
+                </el-form-item>
+                <el-form-item label="分包队伍信息得分" class="review-form-item">
+                  <el-input-number v-model="adjustedScores.subcontractTeam" :min="0" :max="100" :step="1"></el-input-number>
+                  <el-input v-model="reviewComments.subcontract" placeholder="该部分评审意见" style="margin-top: 10px;"></el-input>
+                </el-form-item>
+              </el-form>
+            </div>
           </div>
         </div>
       </div>
@@ -113,7 +139,8 @@ export default {
         if (response.data.code === 1) {
           currentProject.value = response.data.data;
           currentProject.value.id = id;
-          console.log(currentProject.value.id)
+          console.log(response.data.data)
+
           
           
           if (typeof response.data.data.partialScore === 'string') {
@@ -134,7 +161,7 @@ export default {
       try {
         const response = await axios.get('/projectMessages/finds', {
           params: {
-            status: "待审核",
+            
             page: 1,
             pageSize: 10
           }
@@ -153,11 +180,18 @@ export default {
       reviewDialogVisible.value = true;
       await fetchProjectDetails(project.id);
       
-      adjustedScores.constructionTechnique = Number(partialScores.value[0]) || 0;
-      adjustedScores.projectManagement = Number(partialScores.value[1]) || 0;
-      adjustedScores.safetyMeasures = Number(partialScores.value[2]) || 0;
-      adjustedScores.subcontractTeam = Number(partialScores.value[3]) || 0;
-      reviewComment.value = '';
+      const lastApproval = currentProject.value.projectApprovalParts?.[currentProject.value.projectApprovalParts.length - 1];
+      if (lastApproval?.partialScore) {
+        const scores = lastApproval.partialScore.split('，').map(Number);
+        adjustedScores.constructionTechnique = scores[0] || 0;
+        adjustedScores.projectManagement = scores[1] || 0;
+        adjustedScores.safetyMeasures = scores[2] || 0;
+        adjustedScores.subcontractTeam = scores[3] || 0;
+      } else {
+        Object.keys(adjustedScores).forEach(key => {
+          adjustedScores[key] = 0;
+        });
+      }
     };
 
     fetchProjects();
@@ -169,7 +203,6 @@ export default {
       projectManagement: 0,
       safetyMeasures: 0,
     });
-    const reviewComment = ref('');
 
     const adjustedScores = reactive({
       constructionTechnique: 0,
@@ -224,19 +257,42 @@ export default {
       return result;
     });
 
+    const reviewComments = reactive({
+      basicInfo: '',
+      constructionTechnique: '',
+      management: '',
+      subcontract: '',
+    });
+
     const submitReview = async () => {
       try {
-        console.log(currentProject.value.id)
+        // 添加确认对话框
+        await ElMessageBox.confirm(
+          '请确认审核信息无误，提交后将不可修改',
+          '提交确认',
+          {
+            confirmButtonText: '确认提交',
+            cancelButtonText: '返回修改',
+            type: 'warning',
+          }
+        );
+
         const totalScore = Object.values(adjustedScores).reduce((sum, score) => sum + score, 0);
-        const response = await axios.put('/projectApprovals/update', {
+        const combinedComments = [
+          reviewComments.basicInfo,
+          reviewComments.constructionTechnique,
+          reviewComments.management,
+          reviewComments.subcontract
+        ].join('~');
+
+        const response = await axios.post('/projectApprovals/add', {
           projectId: currentProject.value.id,
-          reviewComments: reviewComment.value,
-          status: '已审核',
-          partialScore: Object.values(adjustedScores).join(','),
-          totalScore: totalScore
-          
-        })
-   
+          reviewComments: combinedComments,
+          partialScore: Object.values(adjustedScores).join('，'),
+          totalScore: totalScore,
+          version: currentProject.value.version || 1
+        });
+
         if (response.data.code === 1) {
           ElMessage.success('审核提交成功');
           reviewDialogVisible.value = false;
@@ -245,6 +301,10 @@ export default {
           ElMessage.error(response.data.msg);
         }
       } catch (error) {
+        if (error === 'cancel') {
+          ElMessage.info('已取消提交');
+          return;
+        }
         ElMessage.error('提交审核失败');
       }
     };
@@ -274,18 +334,61 @@ export default {
       });
     };
 
+    const calculatePartTotal = (partialScore) => {
+      if (!partialScore) return 0;
+      return partialScore.split('，')
+        .map(Number)
+        .reduce((sum, score) => sum + score, 0);
+    };
+
+    const finalScore = computed(() => {
+      if (!currentProject.value.projectApprovalParts?.length) return 0;
+      
+      const lastApproval = currentProject.value.projectApprovalParts[currentProject.value.projectApprovalParts.length - 1];
+      if (!lastApproval.partialScore) return 0;
+      
+      return lastApproval.partialScore.split('，')
+        .map(Number)
+        .reduce((sum, score) => sum + score, 0);
+    });
+
+    const finalRiskLevel = computed(() => {
+      if (!currentProject.value.projectApprovalParts?.length) return '未评定';
+      
+      const lastApproval = currentProject.value.projectApprovalParts[currentProject.value.projectApprovalParts.length - 1];
+      return lastApproval.riskLevel || '未评定';
+    });
+
+    // 添加格式化评审意见的函数
+    const formatReviewComments = (comments) => {
+      if (!comments) return '';
+      // 使用正则表达式将连续的波浪线替换为单个句号
+      return comments.replace(/~+/g, '。');
+    };
+
+    const lastReviewer = computed(() => {
+      if (!currentProject.value?.projectApprovalParts?.length) return '';
+      const validParts = currentProject.value.projectApprovalParts.filter(part => part.departmentName);
+      return validParts.length ? validParts[validParts.length - 1].reviewer || '' : '';
+    });
+
     return {
       projects,
       reviewDialogVisible,
       currentProject,
       reviewScores,
-      reviewComment,
       reviewProject,
       submitReview,
       returnProject,
       formattedConstructionProcess,
       adjustedScores,
       partialScores,
+      reviewComments,
+      calculatePartTotal,
+      finalScore,
+      finalRiskLevel,
+      formatReviewComments,
+      lastReviewer,
     };
   }
 };
@@ -297,18 +400,49 @@ export default {
 }
 
 .dialog-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 将内容分为两列 */
+  gap: 20px;
 }
 
-.project-details {
-  flex: 1;
-  margin-right: 20px;
-}
-
-.review-section {
-  flex: 1;
+.left-column {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+p, li {
+  margin: 5px 0;
+  color: #555;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 1200px) {
+  .dialog-content {
+    grid-template-columns: 1fr; /* 在小屏幕上变为单列 */
+  }
 }
 
 .review-scores {
@@ -332,5 +466,30 @@ export default {
 .review-form-item {
   display: flex;
   align-items: center;
+}
+
+.approval-section {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.approval-part {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.approval-part h4 {
+  margin: 0 0 10px 0;
+  color: #409EFF;
+}
+
+.total-score {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
 }
 </style>

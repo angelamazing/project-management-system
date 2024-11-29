@@ -58,16 +58,16 @@
         <section class="approval-section">
           <h3>审批信息</h3>
           <div v-for="(part, index) in project.projectApprovalParts" :key="index" class="approval-part">
-            <h4>{{ part.departmentName || '待审核' }}</h4>
-            <p><strong>审核人:</strong> {{ part.reviewer || '未指定' }}</p>
-            <p><strong>评审意见:</strong> {{ part.reviewComments || '暂无' }}</p>
+            <h4>{{ part.departmentName || '初始' }}</h4>
+            <p><strong>审核人:</strong> {{ part.reviewer || '无' }}</p>
+            <p><strong>各部分评审意见:</strong> {{ formatReviewComments(part.reviewComments) || '无' }}</p>
             <p><strong>各部分得分:</strong> {{ part.partialScore || '未评分' }} 
               <span v-if="part.partialScore">(总分: {{ calculatePartTotal(part.partialScore) }})</span>
             </p>
             <p v-if="part.partialReviewComments"><strong>补充意见:</strong> {{ part.partialReviewComments }}</p>
           </div>
           <div class="total-score">
-            <p><strong>审核总分:</strong> {{ finalScore }}</p>
+            <p><strong>{{ lastReviewer }}审核总分:</strong> {{ finalScore }}</p>
             <p><strong>风险等级:</strong> {{ finalRiskLevel }}</p>
           </div>
         </section>
@@ -156,11 +156,24 @@ const finalScore = computed(() => {
   const validParts = props.project.projectApprovalParts.filter(part => part.departmentName);
   return validParts.length ? validParts[validParts.length - 1].totalScore || '未评分' : '未评分';
 });
-
+  
 const finalRiskLevel = computed(() => {
   if (!props.project?.projectApprovalParts?.length) return '未评定';
   const validParts = props.project.projectApprovalParts.filter(part => part.departmentName);
   return validParts.length ? validParts[validParts.length - 1].riskLevel || '未评定' : '未评定';
+});
+
+// 添加格式化评审意见的函数
+const formatReviewComments = (comments) => {
+  if (!comments) return '';
+  // 使用正则表达式将连续的波浪线替换为单个句号
+  return comments.replace(/~+/g, '。');
+};
+
+const lastReviewer = computed(() => {
+  if (!props.project?.projectApprovalParts?.length) return '';
+  const validParts = props.project.projectApprovalParts.filter(part => part.departmentName);
+  return validParts.length ? validParts[validParts.length - 1].reviewer || '' : '';
 });
 </script>
 

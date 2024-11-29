@@ -115,6 +115,8 @@
 
       <el-dialog v-model="dialogVisible" title="登录信息" @close="dialogVisible = false">
         <p>用户名: {{ username }}</p>
+        <p>用户角色: {{ userRole }}</p>
+        <p>用户部门: {{ userDepartment }}</p>
         
         <el-form 
           ref="passwordForm" 
@@ -158,6 +160,7 @@
 import { mapGetters } from 'vuex';
 import AppSidebar from '../components/Sidebar/AppSidebar.vue';
 import axios from '@/axios'; // 引入 axios
+import departmentMapping from '../constants/departmentMapping';
 
 
 export default {
@@ -175,6 +178,7 @@ export default {
         callback()
       }
     }
+    
 
     const validatePass2 = (rule, value, callback) => {
       if (value === '') {
@@ -224,9 +228,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['username','userId']),
+    ...mapGetters(['username','userId','departmentId','userRole']),
     isDashboardRoot() {
       return this.$route.path === '/dashboard';
+    },
+    userDepartment() {
+      // 使用 departmentMapping 根据 departmentId 获取部门名称
+      return departmentMapping[this.departmentId]?.name || '未知部门';
     }
   },
   mounted() {
