@@ -167,7 +167,7 @@ const finalRiskLevel = computed(() => {
 const formatReviewComments = (comments) => {
   if (!comments) return '';
   // 使用正则表达式将连续的波浪线替换为单个句号
-  return comments.replace(/~+/g, '。');
+  return comments.replace(/~+/g, '   ');
 };
 
 const lastReviewer = computed(() => {
