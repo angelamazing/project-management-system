@@ -1,0 +1,279 @@
+{
+    "extension": "linecounter",
+    "version": "0.2.7",
+    "workspace": "d:\\Projects\\project-management-system",
+    "linecount": [
+        {
+            "version": "0.2.7",
+            "counttime": "2024-11-30 10:54:16",
+            "filesum": 37,
+            "codesum": 31284,
+            "commentsum": 308,
+            "blanksum": 2355,
+            "statistics": {
+                "": {
+                    "code": 19,
+                    "comment": 0,
+                    "blank": 4
+                },
+                ".js": {
+                    "code": 627,
+                    "comment": 150,
+                    "blank": 110
+                },
+                ".md": {
+                    "code": 19,
+                    "comment": 1,
+                    "blank": 5
+                },
+                ".json": {
+                    "code": 20867,
+                    "comment": 0,
+                    "blank": 6
+                },
+                ".vue": {
+                    "code": 3095,
+                    "comment": 125,
+                    "blank": 392
+                },
+                ".html": {
+                    "code": 16,
+                    "comment": 1,
+                    "blank": 0
+                },
+                ".lock": {
+                    "code": 6641,
+                    "comment": 31,
+                    "blank": 1838
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 20,
+                    "comment": 9,
+                    "filename": ".eslintrc.js"
+                },
+                {
+                    "blank": 4,
+                    "code": 19,
+                    "comment": 0,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 8,
+                    "filename": "babel.config.js"
+                },
+                {
+                    "blank": 0,
+                    "code": 11,
+                    "comment": 2,
+                    "filename": "jest.config.js"
+                },
+                {
+                    "blank": 2,
+                    "code": 17,
+                    "comment": 0,
+                    "filename": "jsconfig.json"
+                },
+                {
+                    "blank": 2,
+                    "code": 20792,
+                    "comment": 0,
+                    "filename": "package-lock.json"
+                },
+                {
+                    "blank": 2,
+                    "code": 58,
+                    "comment": 0,
+                    "filename": "package.json"
+                },
+                {
+                    "filename": "public\\favicon.ico",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 0,
+                    "code": 16,
+                    "comment": 1,
+                    "filename": "public\\index.html"
+                },
+                {
+                    "blank": 5,
+                    "code": 19,
+                    "comment": 1,
+                    "filename": "README.md"
+                },
+                {
+                    "blank": 6,
+                    "code": 44,
+                    "comment": 5,
+                    "filename": "src\\App.vue"
+                },
+                {
+                    "filename": "src\\assets\\backgroun1.jpg",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "src\\assets\\logo.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 8,
+                    "code": 28,
+                    "comment": 16,
+                    "filename": "src\\axios.js"
+                },
+                {
+                    "blank": 17,
+                    "code": 62,
+                    "comment": 11,
+                    "filename": "src\\components\\Form\\__tests__\\ConstructionTechniques.spec.js"
+                },
+                {
+                    "blank": 24,
+                    "code": 250,
+                    "comment": 8,
+                    "filename": "src\\components\\Form\\ConstructionTechniques.vue"
+                },
+                {
+                    "blank": 36,
+                    "code": 207,
+                    "comment": 8,
+                    "filename": "src\\components\\Form\\ProjectDetailsTemplate.vue"
+                },
+                {
+                    "blank": 2,
+                    "code": 49,
+                    "comment": 1,
+                    "filename": "src\\components\\ProjectDetail.vue"
+                },
+                {
+                    "blank": 50,
+                    "code": 332,
+                    "comment": 18,
+                    "filename": "src\\components\\ProjectForm.vue"
+                },
+                {
+                    "blank": 34,
+                    "code": 253,
+                    "comment": 15,
+                    "filename": "src\\components\\ProjectList.vue"
+                },
+                {
+                    "blank": 41,
+                    "code": 402,
+                    "comment": 22,
+                    "filename": "src\\components\\ProjectOverview.vue"
+                },
+                {
+                    "blank": 62,
+                    "code": 429,
+                    "comment": 6,
+                    "filename": "src\\components\\ReviewProjects.vue"
+                },
+                {
+                    "blank": 2,
+                    "code": 55,
+                    "comment": 6,
+                    "filename": "src\\components\\Sidebar\\AppSidebar.vue"
+                },
+                {
+                    "blank": 19,
+                    "code": 154,
+                    "comment": 1,
+                    "filename": "src\\components\\SystemLogs.vue"
+                },
+                {
+                    "blank": 38,
+                    "code": 344,
+                    "comment": 18,
+                    "filename": "src\\components\\UserManagement.vue"
+                },
+                {
+                    "blank": 13,
+                    "code": 77,
+                    "comment": 11,
+                    "filename": "src\\composables\\useProjectForm.js"
+                },
+                {
+                    "blank": 23,
+                    "code": 113,
+                    "comment": 28,
+                    "filename": "src\\composables\\useUnsubmittedProjects.js"
+                },
+                {
+                    "blank": 2,
+                    "code": 58,
+                    "comment": 9,
+                    "filename": "src\\constants\\departmentMapping.js"
+                },
+                {
+                    "blank": 12,
+                    "code": 75,
+                    "comment": 9,
+                    "filename": "src\\constants\\projectFormOptions.js"
+                },
+                {
+                    "blank": 4,
+                    "code": 14,
+                    "comment": 9,
+                    "filename": "src\\main.js"
+                },
+                {
+                    "blank": 6,
+                    "code": 68,
+                    "comment": 12,
+                    "filename": "src\\router\\index.js"
+                },
+                {
+                    "blank": 12,
+                    "code": 61,
+                    "comment": 15,
+                    "filename": "src\\store\\auth.js"
+                },
+                {
+                    "blank": 54,
+                    "code": 369,
+                    "comment": 6,
+                    "filename": "src\\views\\AdminDashboard.vue"
+                },
+                {
+                    "blank": 4,
+                    "code": 43,
+                    "comment": 1,
+                    "filename": "src\\views\\Home.vue"
+                },
+                {
+                    "blank": 20,
+                    "code": 164,
+                    "comment": 10,
+                    "filename": "src\\views\\LoginPage.vue"
+                },
+                {
+                    "blank": 12,
+                    "code": 35,
+                    "comment": 11,
+                    "filename": "vue.config.js"
+                },
+                {
+                    "blank": 1838,
+                    "code": 6641,
+                    "comment": 31,
+                    "filename": "yarn.lock"
+                }
+            ]
+        }
+    ]
+}

@@ -14,14 +14,14 @@ module.exports = defineConfig({
   configureWebpack: {
     devtool: 'eval-source-map',},
 
-  devServer: {
-    proxy: {        
-        '/projectMessages': {
-          target: 'http://192.168.1.105:8080', // 后端服务地址
-          changeOrigin: true,
-        },
-      },
-    },
+  // devServer: {
+  //   proxy: {        
+  //       '/projectMessages': {
+  //         target: 'http://springbootweb:8080', // 后端服务地址
+  //         changeOrigin: true,
+  //       },
+  //     },
+  //   },
   
 
 })
@@ -51,6 +51,8 @@ module.exports = {
   }
 };
 
-
+module.exports = {
+  outputDir: '../java+mysql+nginx/dist',
+};
 
 

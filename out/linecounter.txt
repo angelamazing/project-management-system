@@ -1,0 +1,60 @@
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2024-11-30 10:54:16
+count workspace : d:\Projects\project-management-system
+total files : 37
+total code lines : 31284
+total comment lines : 308
+total blank lines : 2355
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |               |             19|              0|              4|  0.061|
+   |            .js|            627|            150|            110|    2.0|
+   |            .md|             19|              1|              5|  0.061|
+   |          .json|          20867|              0|              6|     67|
+   |           .vue|           3095|            125|            392|    9.9|
+   |          .html|             16|              1|              0|  0.051|
+   |          .lock|           6641|             31|           1838|     21|
+   -------------------------------------------------------------------------
+.eslintrc.js, code is 20, comment is 9, blank is 0.
+.gitignore, code is 19, comment is 0, blank is 4.
+babel.config.js, code is 5, comment is 8, blank is 1.
+jest.config.js, code is 11, comment is 2, blank is 0.
+jsconfig.json, code is 17, comment is 0, blank is 2.
+package-lock.json, code is 20792, comment is 0, blank is 2.
+package.json, code is 58, comment is 0, blank is 2.
+public\favicon.ico, it is a binary file.
+public\index.html, code is 16, comment is 1, blank is 0.
+README.md, code is 19, comment is 1, blank is 5.
+src\App.vue, code is 44, comment is 5, blank is 6.
+src\assets\backgroun1.jpg, it is a binary file.
+src\assets\logo.png, it is a binary file.
+src\axios.js, code is 28, comment is 16, blank is 8.
+src\components\Form\__tests__\ConstructionTechniques.spec.js, code is 62, comment is 11, blank is 17.
+src\components\Form\ConstructionTechniques.vue, code is 250, comment is 8, blank is 24.
+src\components\Form\ProjectDetailsTemplate.vue, code is 207, comment is 8, blank is 36.
+src\components\ProjectDetail.vue, code is 49, comment is 1, blank is 2.
+src\components\ProjectForm.vue, code is 332, comment is 18, blank is 50.
+src\components\ProjectList.vue, code is 253, comment is 15, blank is 34.
+src\components\ProjectOverview.vue, code is 402, comment is 22, blank is 41.
+src\components\ReviewProjects.vue, code is 429, comment is 6, blank is 62.
+src\components\Sidebar\AppSidebar.vue, code is 55, comment is 6, blank is 2.
+src\components\SystemLogs.vue, code is 154, comment is 1, blank is 19.
+src\components\UserManagement.vue, code is 344, comment is 18, blank is 38.
+src\composables\useProjectForm.js, code is 77, comment is 11, blank is 13.
+src\composables\useUnsubmittedProjects.js, code is 113, comment is 28, blank is 23.
+src\constants\departmentMapping.js, code is 58, comment is 9, blank is 2.
+src\constants\projectFormOptions.js, code is 75, comment is 9, blank is 12.
+src\main.js, code is 14, comment is 9, blank is 4.
+src\router\index.js, code is 68, comment is 12, blank is 6.
+src\store\auth.js, code is 61, comment is 15, blank is 12.
+src\views\AdminDashboard.vue, code is 369, comment is 6, blank is 54.
+src\views\Home.vue, code is 43, comment is 1, blank is 4.
+src\views\LoginPage.vue, code is 164, comment is 10, blank is 20.
+vue.config.js, code is 35, comment is 11, blank is 12.
+yarn.lock, code is 6641, comment is 31, blank is 1838.
+===============================================================================
