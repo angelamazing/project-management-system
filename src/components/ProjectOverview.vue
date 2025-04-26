@@ -108,7 +108,8 @@ export default defineComponent({
       pieChartOptions: {},
       barChartOptions: {},
       pieChartTitle: '项目分布',
-      selectedChartItem: null, // 新增：记录图表点击的项
+      selectedChartItem: null,
+      refreshInterval: null,
     };
   },
   computed: {
@@ -143,9 +144,18 @@ export default defineComponent({
       try {
         const { data: response } = await axios.get('/projectOverviews/finds');
         if (response.code === 1) {
-          // 直接使用后端返回的数据，不需要转换
-          // console.log(response.data);
-          this.projects = response.data;
+          // 使用 Set 和 Map 进行高效去重
+          const projectMap = new Map();
+          response.data.forEach(project => {
+            if (!projectMap.has(project.id)) {
+              projectMap.set(project.id, project);
+            }
+          });
+          this.projects = Array.from(projectMap.values());
+          // 强制更新视图
+          this.$forceUpdate();
+          // 更新图表
+          this.updateChart();
         } else {
           this.$message.error(response.msg || '获取项目数据失败');
         }
@@ -389,14 +399,24 @@ export default defineComponent({
           });
         });
       }
+
+      // 添加自动刷新机制，每30秒刷新一次数据
+      this.refreshInterval = setInterval(() => {
+        this.fetchProjectData();
+        this.fetchStatusData();
+      }, 30000);
     });
   },
 
-  // 添加 unmounted 生命周期钩子，清理事件监听
+  // 修改 unmounted 生命周期钩子，清理事件监听和定时器
   unmounted() {
     const pieChart = this.$refs.pieChart;
     if (pieChart && pieChart.chart) {
       pieChart.chart.off('click');
+    }
+    // 清理定时器
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
     }
   }
 });
